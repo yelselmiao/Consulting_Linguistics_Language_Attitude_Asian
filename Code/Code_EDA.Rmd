@@ -1,0 +1,169 @@
+---
+title: "Analysis Notebook"
+output: github_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r Load library}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(rstatix))
+```
+
+```{r Load Data}
+#Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24 <- read_excel("Data/Les différents accents du français - Asians+Whites_October 26, 2022_08.24.xlsx")
+raw_data <- Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24
+
+
+print(raw_data[1,])
+```
+
+
+```{r Rename Columns}
+data <- raw_data[-1, ]
+
+data <- data %>%
+  select(-c(IPAddress, Finished, ResponseId, QID18_1, QID18_2, QID18_3,
+            QID18_5, QID18_6, QID18_7, QID18_8, QID18_9, QID18_10, QID19, `10B`, Courriel,
+            `1B`, `2B`, `3B`, `4B`, `5B`, `6B`, `7B`, `8B`, `9B`, `10B`)) %>% 
+  rename(gender = Q1,
+         gender_other = Q1_4_TEXT, 
+         age = Q2,
+         country_of_birth = Q3,
+         grow_up_province = Q41,
+         grow_up_city = Q4,
+         field_of_study = Q5,
+         ethnic_group = Q6,
+         ethnic_group_other = Q6_13_TEXT, 
+         num_of_language = Q7...123, 
+         spoken_language = Q7...124, 
+         spoken_language_other = Q7_11_TEXT,
+         mother_tongue = Q8,
+         mother_tongue_other = Q8_11_TEXT,
+         year_of_french = Q9,
+         french_speaking_place = Q10,
+         french_speaking_place_other = Q10_6_TEXT,
+         month_live_in_fr_env = Q10B,
+         pref_french = Q11,
+         pref_french_other = Q11_3_TEXT,
+         teacher_origin = Q12, 
+         teacher_origin_other = Q12_3_TEXT
+         ) %>% 
+  mutate(age = as.numeric(age),
+         num_of_language = as.numeric(num_of_language),
+         year_of_french = as.numeric(year_of_french),
+         )
+
+# convert rating 
+data <- data %>%  
+  mutate_at(vars(1:90), as.numeric)
+
+data <- data %>% 
+  mutate_if(is.character, as.factor)
+```
+
+
+# Participant Portrait
+
+```{r}
+nrow(data)
+```
+
+
+```{r Participant gender}
+data %>% 
+  group_by(gender) %>% 
+  tally() %>%  
+  mutate(prop = scales::percent(n/nrow(data)))
+
+
+data %>%  
+  select(gender, gender_other) %>% 
+  filter(gender %in% c('Prefer not to answer', 'Prefer to define myself', NA))
+# 1 person recognize as agnder, others did not reveal 
+```
+
+```{r Participant Age}
+range(data$age, na.rm = TRUE)
+
+# 9 missing value  
+data %>%  
+  ggplot(aes(x = age)) + 
+  geom_density() + 
+  geom_vline(xintercept = mean(data$age, na.rm = TRUE), color = 'red') + 
+  theme_bw()
+```
+
+```{r Country of Birth}
+# born in Canda
+data %>%  
+  select(country_of_birth) %>%  
+  mutate(Canada = ifelse(country_of_birth == 'Canada', TRUE, FALSE)) %>% 
+  group_by(Canada) %>% 
+  tally()
+
+
+data %>%  
+  drop_na(country_of_birth) %>% 
+  select(country_of_birth) %>% 
+  filter(country_of_birth != 'Canada') %>% 
+  mutate(continent = case_when(country_of_birth %in% c('China', 'India', 'South Korea', 'Japan', 'Pakistan', 'Philippines') ~ 'Asia', 
+                               country_of_birth %in% c('Mauritius', 'Egypt', 'Nigeria') ~ 'Africa',
+                               country_of_birth %in% c('United Kingdom of Great Britain and Northern Ireland', 'Czech Republic', 'Italy', 'Germany') ~ 'Europe',
+                               country_of_birth %in% c('United States of America', 'Brazil', 'Mexico') ~ 'America')) %>%  
+  group_by(continent) %>%  
+  tally()
+```
+
+```{r Grow-up Province}
+data %>% 
+  filter(country_of_birth == 'Canada') %>%  
+  group_by(grow_up_province) %>% 
+  tally() %>% 
+  mutate(prop = scales::percent(n/sum(n)))
+```
+
+```{r Field of Study}
+data %>%  
+  group_by(field_of_study) %>% 
+  tally() 
+```
+
+```{r # of Language Spoken}
+# 13 missing data 
+data %>% 
+  drop_na(num_of_language) %>% 
+  group_by(num_of_language) %>% 
+  tally() %>% 
+  mutate(prop = scales::percent(n/sum(n))) 
+```
+
+
+```{r Spoken Language}
+data %>% 
+  drop_na(spoken_language) %>% 
+  select(spoken_language)
+  
+```
+
+```{r }
+names(data)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
