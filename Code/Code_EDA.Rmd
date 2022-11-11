@@ -126,13 +126,23 @@ data %>%
 ```{r Field of Study}
 data %>%  
   group_by(field_of_study) %>% 
-  tally() 
+  tally() %>% 
+  filter(field_of_study %in% c('Français', 'French', 'Linguistic', 'linguistique et psychologie', 'linguistiques', 'Linguistiques (Arts)'))
+# six people are with French or linguitistic background
 ```
+```{r}
+data %>% 
+  group_by(ethnic_group) %>% 
+  tally()
+```
+
+
+
 
 ```{r # of Language Spoken}
 # 13 missing data 
 data %>% 
-  drop_na(num_of_language) %>% 
+  # drop_na(num_of_language) %>% 
   group_by(num_of_language) %>% 
   tally() %>% 
   mutate(prop = scales::percent(n/sum(n))) 
@@ -140,10 +150,123 @@ data %>%
 
 
 ```{r Spoken Language}
+# 7 missing values 
 data %>% 
   drop_na(spoken_language) %>% 
-  select(spoken_language)
+  select(spoken_language, spoken_language_other) %>% 
+  mutate(English = ifelse(str_detect(spoken_language, 'English'), TRUE, FALSE)) %>% 
+  filter(English != TRUE)
+# 2 people don't speak English 
+```
+
+```{r Month Tongue}
+month_tongue_df <- data %>% 
+  select(mother_tongue) %>%
+  mutate(English = ifelse(str_detect(mother_tongue, "English") | str_detect(mother_tongue, "Anglais"), TRUE, FALSE),
+         Cantonese = ifelse(str_detect(mother_tongue,"Cantonese"), TRUE, FALSE), 
+         Hindi = ifelse(str_detect(mother_tongue,"Hindi"), TRUE, FALSE),
+         Mandarin = ifelse(str_detect(mother_tongue,"Mandarin"), TRUE, FALSE),      
+         Korean = ifelse(str_detect(mother_tongue,"Korean"), TRUE, FALSE),
+         Spanish = ifelse(str_detect(mother_tongue,"Spanish"), TRUE, FALSE),  
+         German = ifelse(str_detect(mother_tongue,"German"), TRUE, FALSE),  
+         Tagalog = ifelse(str_detect(mother_tongue,"Tagalog"), TRUE, FALSE))  
+
+language_count = matrix(NA, nrow = 7, ncol = 2)
+language_count[,1] <- names(month_tongue_df)[2:8]
+for (i in 1:7){
+  language_count[i,2] = as.numeric(table(month_tongue_df[,i+1]))[2]
+}
+
+
+language_count <- as.data.frame(language_count)
+colnames(language_count) = c('mother_tongue', 'n')
+
+language_count %>% arrange(desc(n))
+```
+
+```{r Year of Studying French}
+
+# 15 missing value
+data %>% 
+  # drop_na(year_of_french) %>% 
+  mutate(year_interval = case_when(year_of_french<=5~'0-5', 
+                                   year_of_french>5 & year_of_french <= 10~ '5-10', 
+                                   year_of_french>10 & year_of_french<= 15~ '10-15', 
+                                   year_of_french > 15~'15+')) %>% 
+  group_by(year_interval) %>%
+  tally() %>% 
+  mutate(prop = scales::percent(n/sum(n)))
+
   
+  
+  
+  # drop_
+  # tally() %>% 
+  # ggplot(aes(x="", y = n, fill=year_group))+
+  # geom_bar(width = 1, stat = "identity")+
+  # coord_polar("y") + 
+  # scale_fill_discrete(name = "Years of Studying French") 
+```
+
+
+
+```{r Live in French-speaking Area }
+live_in_french_env_df <- as.data.frame(t(as.data.frame(data %>% 
+  select(french_speaking_place)  %>% 
+  group_by(french_speaking_place) %>% 
+  tally() %>% 
+  mutate(France = ifelse(french_speaking_place == 'France' | french_speaking_place == 'France, Elsewhere? if so please specify:', n, NA),
+         Quebec = ifelse(french_speaking_place == 'Quebec' | french_speaking_place == 'Quebec, Elsewhere? if so please specify:', n, NA),
+         never = ifelse(str_detect(french_speaking_place, 'I have never stayed in a French-speaking context.'), n, NA),
+         other = ifelse(french_speaking_place == 'Elsewhere? if so please specify:', n, NA),
+         both = ifelse(french_speaking_place %in% c('Quebec and France', 'Quebec, France'), n, NA),
+         unkown = ifelse(is.na(french_speaking_place), n, NA)
+         )%>% 
+  summarize(France = sum(France, na.rm = TRUE),
+            Quebec = sum(Quebec, na.rm = TRUE),
+            never = sum(never, na.rm = TRUE),
+            other = sum(other, na.rm = TRUE),
+            both = sum(both, na.rm = TRUE), 
+            unkown = sum(unkown, na.rm = TRUE)))))
+
+live_in_french_env_df <- tibble::rownames_to_column(live_in_french_env_df, "Area")
+live_in_french_env_df %>% 
+  mutate(prop = scales::percent(V1/sum(V1)))
+```
+```{r Months of Living in French-speaking areas}
+levels(data$month_live_in_fr_env) <- c("1 - 3", "4 - 6", "7 - 12", "< 1", "> 12")
+data$month_live_in_fr_env <- factor(data$month_live_in_fr_env, levels = c("< 1", "1 - 3", "4 - 6", "7 - 12", "> 12")) 
+data %>% 
+  group_by(month_live_in_fr_env) %>% 
+  tally() %>%  
+  mutate(prop = scales::percent(n/sum(n))) 
+```
+
+```{r Preferred Type of French}
+data %>% 
+  select(pref_french) %>% 
+  group_by(pref_french) %>%
+  tally() %>% 
+  mutate(prop = scales::percent(n/sum(n)))
+
+```
+
+
+```{r Origin of Teacher}
+data %>% 
+  group_by(teacher_origin) %>%  
+  tally() 
+
+
+
+data %>%  
+  filter(teacher_origin == 'Other(s), specify:') %>% 
+  select(teacher_origin_other)
+```
+
+```{r Preferred Type of french to learn}
+data %>% 
+  group_by(pref_french)
 ```
 
 ```{r }
