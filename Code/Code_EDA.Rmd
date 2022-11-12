@@ -130,7 +130,7 @@ data %>%
   filter(field_of_study %in% c('Français', 'French', 'Linguistic', 'linguistique et psychologie', 'linguistiques', 'Linguistiques (Arts)'))
 # six people are with French or linguitistic background
 ```
-```{r}
+```{r ethnic group}
 data %>% 
   group_by(ethnic_group) %>% 
   tally()
@@ -257,23 +257,38 @@ data %>%
   group_by(teacher_origin) %>%  
   tally() 
 
-
-
 data %>%  
   filter(teacher_origin == 'Other(s), specify:') %>% 
   select(teacher_origin_other)
 ```
 
-```{r Preferred Type of french to learn}
-data %>% 
-  group_by(pref_french)
+
+# Part I - Recording Evaluation
+
+1A: Quebec. White.
+2A: French. White
+3A. Acadian. White
+4A. English. White.
+5A. African. White.
+6A. Quebec. Asian
+7A. African. Asian
+8A. Acadian. Asian
+9A. French. Asian
+10A. English. Asian
+
+
+
+```{r}
+
 ```
+
+
 
 ```{r }
 names(data)
 ```
 
-
+#
 
 
 
