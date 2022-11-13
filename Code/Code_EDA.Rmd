@@ -266,26 +266,101 @@ data %>%
 # Part I - Recording Evaluation
 
 1A: Quebec. White.
-2A: French. White
-3A. Acadian. White
-4A. English. White.
-5A. African. White.
-6A. Quebec. Asian
-7A. African. Asian
-8A. Acadian. Asian
-9A. French. Asian
-10A. English. Asian
+2A: French. Asian.
+3A. Acadian. Asian.
+4A. L2 French. White.
+5A. African. Asian. 
+6A. Quebec. Asian.
+7A. African. White. 
+8A. Acadian. White. 
+9A. French. White. 
+10A. L2 French. Asian.
 
 
 
-```{r}
+
+* General Perspective  
+1) I think this is beautiful French 
+
+
+* Understandability
+2) Is it rather easy or difficult to understand the speaker?
+3) Would the person who did the recording be a good French teacher at UBC?
+
+* Solidarity dimension
+5) This person is dynamic.
+6) This person is nice.
+7) This person is social.
+
+* Status traits
+8) This person is professional.
+9) This person is leader.
+10) This person is educated.
+
+
+```{r Keep Recording Evluation Columns}
+recording_df <- data %>% 
+  select(c(1:90)) 
+```
+
+```{r Beautiful French}
+beautiful_fr <- 
+  recording_df %>% 
+  select(seq(1, 82, 9)) %>% 
+  transmute(Quebec = `1A_1` + `6A_1`, 
+         French = `2A_1` + `9A_1`, 
+         Acadian = `3A_1` + `8A_1`, 
+         `L2 French` = `4A_1` + `10A_1`, 
+         African = `5A_1` + `7A_1`
+        ) %>% 
+  mutate(id = 1:nrow(recording_df))
+
+
+# short to long 
+beautiful_fr_long <- beautiful_fr %>%  
+  gather(key = "Accent", value = "value", Quebec, French, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, Accent)
+
+
+beautiful_fr_long %>%  
+  group_by(Accent) %>% 
+  get_summary_stats(value, type = 'mean_sd')
+# Note: only 83 people complete the survey
+
+
+
+
 
 ```
 
 
+1A: Quebec. White.
+2A: French. Asian.
+3A. Acadian. Asian.
+4A. L2 French. White.
+5A. African. Asian. 
+6A. Quebec. Asian.
+7A. African. White. 
+8A. Acadian. White. 
+9A. French. White. 
+10A. L2 French. Asian.
+
+
+```{r}
+test_df_2 <- beautiful_fr %>% 
+  transmute(Quebec = `1A_1` + `6A_1`, 
+         French = `2A_1` + `9A_1`, 
+         Acadian = `3A_1` + `8A_1`, 
+         L2_French = `4A_1` + `10A_1`, 
+         African = `5A_1` + `7A_1`
+        )
+```
+
+
+
 
 ```{r }
-names(data)
+names(recording_df)
 ```
 
 #
