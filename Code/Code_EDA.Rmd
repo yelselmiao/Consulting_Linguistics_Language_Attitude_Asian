@@ -543,6 +543,20 @@ cowplot::plot_grid(p_beautiful,p_dynamic, p_nice, p_social)
 
 ```
 
+```{r}
+pull(dynamic_df_long %>% 
+  group_by(accent) %>% 
+  summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
+
+table_filler <- function(df){
+  res <- df %>% 
+  group_by(accent) %>% 
+  summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
+}
+
+
+```
+
 
 ```{r}
 test_df_2 <- beautiful_fr %>% 
