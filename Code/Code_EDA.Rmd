@@ -8,6 +8,7 @@ editor_options:
 ```{r Load library}
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(rstatix))
+suppressPackageStartupMessages(library(ggpubr))
 ```
 
 ```{r Load Data}
@@ -65,7 +66,7 @@ data <- data %>%
 
 # Participant Portrait
 
-```{r}
+```{r # of participants}
 nrow(data)
 ```
 
@@ -329,7 +330,39 @@ beautiful_fr_long %>%
 
 
 
+# repeated measure ANOVA
+anova_beau_fr <-
+  get_anova_table(anova_test(
+    data = beautiful_fr_long,
+    dv = value,
+    wid = id,
+    within = Accent
+  ))
 
+# paired t test
+beautiful_fr_pw <- beautiful_fr_long %>%
+  pairwise_t_test(value ~ Accent,
+                  paired = TRUE,
+                  p.adjust.method = 'bonferroni') %>% 
+  mutate(y.position = c(seq(12, 16.5, by = 0.5)))
+
+
+p_beautiful <- ggboxplot(beautiful_fr_long, x = "Accent", y = "value", fill = "Accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(beautiful_fr_pw, vjust = 0.1, bracket.nudge.y = 0.6, size = 2,hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(anova_beau_fr, detailed = TRUE),
+    caption = get_pwc_label(beautiful_fr_pw),
+    title = 'Beautiful French',
+    y = 'Score',
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
 
 ```
 
@@ -344,6 +377,171 @@ beautiful_fr_long %>%
 8A. Acadian. White. 
 9A. French. White. 
 10A. L2 French. Asian.
+
+
+```{r Solidarity dimension - create df}
+# 5) This person is dynamic.
+# 6) This person is nice.
+# 7) This person is social.
+
+sd_df <- recording_df %>% 
+  select(contains(c('_5', '_6', '_7'))) %>%
+  transmute(que_dynamic = `1A_5` + `6A_5`, 
+         fr_dynamic = `2A_5` + `9A_5`, 
+         aca_dynamic = `3A_5` + `8A_5`, 
+         l2_dynamic = `4A_5` + `10A_5`, 
+         afr_dynamic = `5A_5` + `7A_5`, 
+         que_nice = `1A_6` + `6A_6`, 
+         fr_nice = `2A_6` + `9A_6`, 
+         aca_nice = `3A_6` + `8A_6`, 
+         l2_nice = `4A_6` + `10A_6`, 
+         afr_nice = `5A_6` + `7A_6`, 
+         que_social = `1A_7` + `6A_7`, 
+         fr_social = `2A_7` + `9A_7`, 
+         aca_social = `3A_7` + `8A_7`, 
+         l2_social = `4A_7` + `10A_7`, 
+         afr_social = `5A_7` + `7A_7`, 
+          )
+
+# dynamic 
+dynamic_df_long <- sd_df %>% 
+  select(c(1:5)) %>%  
+  rename(Quebec = que_dynamic,
+         European = fr_dynamic,
+         Acadian = aca_dynamic,
+         `L2 French` = l2_dynamic,
+         African = afr_dynamic
+         ) %>% 
+  mutate(id = 1: nrow(sd_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+
+
+# nice 
+nice_df_long <- sd_df %>% 
+  select(c(6:10)) %>%  
+  rename(Quebec = que_nice,
+         European = fr_nice,
+         Acadian = aca_nice, 
+         `L2 French` = l2_nice,
+         African = afr_nice
+         ) %>% 
+  mutate(id = 1: nrow(sd_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+
+# social 
+
+social_df_long <- sd_df %>% 
+  select(c(11:15)) %>%  
+  rename(Quebec = que_social,
+         European = fr_social,
+         Acadian = aca_social,
+         `L2 French` = l2_social,
+         African = afr_social
+         ) %>% 
+  mutate(id = 1: nrow(sd_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+```
+
+```{r SD - Dynamic}
+dynamic_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_dynamic <- get_anova_table(anova_test(data = dynamic_df_long, dv = value, wid = id, within = accent))
+  
+dynamic_pw <- dynamic_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+
+
+p_dynamic <- ggboxplot(dynamic_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(dynamic_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_dynamic, detailed = TRUE),
+    caption = get_pwc_label(dynamic_pw),
+    y = 'Score',
+    title = 'Dynamic'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+```
+```{r SD - Nice}
+nice_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+
+res_nice <- get_anova_table(anova_test(data = nice_df_long, dv = value, wid = id, within = accent))
+  
+nice_pw <- nice_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1)))
+p_nice <- ggboxplot(nice_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(nice_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_nice, detailed = TRUE),
+    caption = get_pwc_label(nice_pw),
+    title = 'Nice',
+    y = 'Score',
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+
+```
+
+```{r SD - Social}
+social_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_social <- get_anova_table(anova_test(data = social_df_long, dv = value, wid = id, within = accent))
+  
+social_pw <- social_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1)))
+(p_social <- ggboxplot(social_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(social_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) +
+  labs(
+    subtitle = get_test_label(res_social, detailed = TRUE),
+    caption = get_pwc_label(social_pw),
+    title = 'Social',
+    y = 'Score',
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold')))
+```
+
+```{r SD Results, fig.height= 8, fig.width= 8}
+cowplot::plot_grid(p_beautiful,p_dynamic, p_nice, p_social)
+
+```
 
 
 ```{r}
