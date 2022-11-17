@@ -540,7 +540,6 @@ social_pw <- social_df_long %>%
 
 ```{r SD Results, fig.height= 8, fig.width= 8}
 cowplot::plot_grid(p_beautiful,p_dynamic, p_nice, p_social)
-
 ```
 
 ```{r}
@@ -548,11 +547,16 @@ pull(dynamic_df_long %>%
   group_by(accent) %>% 
   summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
 
-table_filler <- function(df){
-  res <- df %>% 
-  group_by(accent) %>% 
-  summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
+table_filler <- function(df) {
+  res <- pull(df %>%
+    group_by(accent) %>%
+    summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
+  return(res)
 }
+
+
+
+res_tb <- matrix(NA, nrow = )
 
 
 ```
