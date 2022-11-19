@@ -304,6 +304,7 @@ recording_df <- data %>%
   select(c(1:90)) 
 ```
 
+## General Perspective
 ```{r Beautiful French}
 beautiful_fr <- 
   recording_df %>% 
@@ -367,18 +368,8 @@ p_beautiful <- ggboxplot(beautiful_fr_long, x = "Accent", y = "value", fill = "A
 ```
 
 
-1A: Quebec. White.
-2A: French. Asian.
-3A. Acadian. Asian.
-4A. L2 French. White.
-5A. African. Asian. 
-6A. Quebec. Asian.
-7A. African. White. 
-8A. Acadian. White. 
-9A. French. White. 
-10A. L2 French. Asian.
 
-
+## Solidarity dimension
 ```{r Solidarity dimension - create df}
 # 5) This person is dynamic.
 # 6) This person is nice.
@@ -538,15 +529,11 @@ social_pw <- social_df_long %>%
         plot.title = element_text(size=15, face = 'bold')))
 ```
 
-```{r SD Results, fig.height= 8, fig.width= 8}
+```{r SD Plot, fig.height= 8, fig.width= 8}
 cowplot::plot_grid(p_beautiful,p_dynamic, p_nice, p_social)
 ```
 
-```{r}
-pull(dynamic_df_long %>% 
-  group_by(accent) %>% 
-  summarize(mean = round(mean(value, na.rm = TRUE), 1)), mean)
-
+```{r SD Table}
 table_filler <- function(df) {
   res <- pull(df %>%
     group_by(accent) %>%
@@ -554,12 +541,121 @@ table_filler <- function(df) {
   return(res)
 }
 
+# matrix <- function(x, a,b) {
+#    base::matrix(x,nrow =a, ncol=b)
+# }
+
+res_tb <- matrix(NA ,3, 7)
+
+res_tb[1, 1:5]  <- table_filler(dynamic_df_long)
+res_tb[2, 1:5]  <- table_filler(nice_df_long)
+res_tb[3, 1:5]  <- table_filler(social_df_long)
 
 
-res_tb <- matrix(NA, nrow = )
+res_tb[, 6] <- c(res_dynamic$F, res_nice$F, res_social$F)
+res_tb[, 7] <- c(res_dynamic$p, res_nice$p, res_social$p)
 
-
+res_tb <- as.data.frame(res_tb)
+colnames(res_tb) <-
+  c(
+    'mean_Acadian',
+    'mean_African',
+    'mean_L2',
+    'mean_French',
+    'mean_Quebec',
+    'F',
+    'p-value'
+  )
+rownames(res_tb) <- c('Dynamic', 'Nice', 'Social')
+res_tb
 ```
+
+
+## Status traits
+
+1A: Quebec. White.
+2A: French. Asian.
+3A. Acadian. Asian.
+4A. L2 French. White.
+5A. African. Asian. 
+6A. Quebec. Asian.
+7A. African. White. 
+8A. Acadian. White. 
+9A. French. White. 
+10A. L2 French. Asian.
+
+
+```{r ST: create df}
+
+# 8) This person is professional
+# 9) This person is a good leader. 
+# 10) This person is educated.
+
+
+st_df <- recording_df %>%
+  select(contains(c('_8', '_9', '_10'))) %>%
+  transmute(
+    que_prof = `1A_8` + `6A_8`,
+    fr_prof = `2A_8` + `9A_8`,
+    aca_prof = `3A_8` + `8A_8`,
+    l2_prof = `4A_8` + `10A_8`,
+    afr_prof = `5A_8` + `7A_8`,
+    que_lead = `1A_9` + `6A_9`,
+    fr_lead = `2A_9` + `9A_9`,
+    aca_lead = `3A_9` + `8A_9`,
+    l2_lead = `4A_9` + `10A_9`,
+    afr_lead = `5A_9` + `7A_9`,
+    que_edu = `1A_10` + `6A_10`,
+    fr_edu = `2A_10` + `9A_10`,
+    aca_edu = `3A_10` + `8A_10`,
+    l2_edu = `4A_10` + `10A_10`,
+    afr_edu = `5A_10` + `7A_10`,
+  )
+
+
+# professional  
+prof_df_long <- st_df %>% 
+  select(c(1:5)) %>%  
+  rename(Quebec = que_prof,
+         European = fr_prof,
+         Acadian = aca_prof,
+         `L2 French` = l2_prof,
+         African = afr_prof
+         ) %>% 
+  mutate(id = 1: nrow(st_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+
+# leadership  
+lead_df_long <- st_df %>% 
+  select(c(6:10)) %>%  
+  rename(Quebec = que_lead,
+         European = fr_lead,
+         Acadian = aca_lead,
+         `L2 French` = l2_lead,
+         African = afr_lead
+         ) %>% 
+  mutate(id = 1: nrow(st_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+
+
+# educated   
+edu_df_long <- st_df %>% 
+  select(c(11:15)) %>%  
+  rename(Quebec = que_edu,
+         European = fr_edu,
+         Acadian = aca_edu,
+         `L2 French` = l2_edu,
+         African = afr_edu
+         ) %>% 
+  mutate(id = 1: nrow(st_df)) %>%  
+  gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+```
+
+
+
 
 
 ```{r}
