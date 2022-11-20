@@ -264,7 +264,7 @@ data %>%
 ```
 
 
-# Part I - Recording Evaluation
+# Part I - Recording Evaluation: Accent
 
 1A: Quebec. White.
 2A: French. Asian.
@@ -367,6 +367,137 @@ p_beautiful <- ggboxplot(beautiful_fr_long, x = "Accent", y = "value", fill = "A
 
 ```
 
+## Understandability 
+```{r Understandability - Create df}
+# 2) This person is easy to understand.
+# 3) This person could be a good French teacher at UBC.
+
+und_df <- recording_df %>%
+  select(contains(c('_2', '3'))) %>%
+      transmute(
+        que_easy_und = `1A_2` + `6A_2`,
+        fr_easy_und = `2A_2` + `9A_2`,
+        aca_easy_und = `3A_2` + `8A_2`,
+        l2_easy_und = `4A_2` + `10A_2`,
+        afr_easy_und = `5A_2` + `7A_2`,
+        que_good_teacher = `1A_3` + `6A_3`,
+        fr_good_teacher = `2A_3` + `9A_3`,
+        aca_good_teacher = `3A_3` + `8A_3`,
+        l2_good_teacher = `4A_3` + `10A_3`,
+        afr_good_teacher = `5A_3` + `7A_3`)
+           
+easy_und_df_long <- und_df %>% 
+  select(que_easy_und, fr_easy_und, aca_easy_und, l2_easy_und, afr_easy_und) %>%
+  rename(Quebec = que_easy_und,
+         European = fr_easy_und,
+         Acadian = aca_easy_und,
+         `L2 French` = l2_easy_und,
+         African = afr_easy_und
+         ) %>% 
+  mutate(id = 1: nrow(und_df)) %>% 
+    gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)
+
+
+good_teacher_df_long <- und_df %>% 
+  select(que_good_teacher, fr_good_teacher, aca_good_teacher,l2_good_teacher, afr_good_teacher) %>%
+  rename(Quebec = que_good_teacher,
+         European = fr_good_teacher,
+         Acadian = aca_good_teacher,
+         `L2 French` = l2_good_teacher,
+         African = afr_good_teacher) %>% 
+  mutate(id = 1: nrow(und_df)) %>% 
+    gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
+  convert_as_factor(id, accent)  
+```
+
+```{r Understandability - Easy to understand}
+easy_und_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_easy_und <- get_anova_table(anova_test(data = easy_und_df_long, dv = value, wid = id, within = accent))
+  
+easy_und_pw <- easy_und_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+
+p_easy_und <- ggboxplot(easy_und_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(easy_und_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_easy_und, detailed = TRUE),
+    caption = get_pwc_label(easy_und_pw),
+    y = 'Score',
+    title = 'Easy to Understand'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+```
+
+
+```{r Understandability - Good teacher}
+good_teacher_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_good_teacher <- get_anova_table(anova_test(data = good_teacher_df_long, dv = value, wid = id, within = accent))
+  
+good_teacher_pw <- good_teacher_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+
+p_good_teacher <- ggboxplot(good_teacher_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(good_teacher_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_good_teacher, detailed = TRUE),
+    caption = get_pwc_label(good_teacher_pw),
+    y = 'Score',
+    title = 'Easy to Understand'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+```
+```{r Understandability - Plot}
+cowplot::plot_grid(p_easy_und, p_good_teacher)
+
+```
+```{r Understandability - table}
+
+matrix <- function(x, a,b) {
+   base::matrix(x,nrow =a, ncol=b)
+}
+
+res_tb_und <- matrix(NA,  2, 7)
+
+res_tb_und[1, 1:5] <- table_filler(easy_und_df_long)
+res_tb_und[2, 1:5] <- table_filler(good_teacher_df_long)
+
+res_tb_und[, 6] <- c(res_easy_und$F, res_good_teacher$F)
+res_tb_und[, 7] <- c(res_easy_und$p, res_good_teacher$p)
+
+
+res_tb_und <- as.data.frame(res_tb_und)
+colnames(res_tb_und) <- c('mean_Acadian', 'mean_African', 'mean_l2','mean_French', 'mean_Quebec', 'F', 'p-value')
+rownames(res_tb_und) <- c('Easy to Understand', 'Good French Teacher')
+res_tb_und
+
+```
 
 
 ## Solidarity dimension
@@ -573,16 +704,6 @@ res_tb
 
 ## Status traits
 
-1A: Quebec. White.
-2A: French. Asian.
-3A. Acadian. Asian.
-4A. L2 French. White.
-5A. African. Asian. 
-6A. Quebec. Asian.
-7A. African. White. 
-8A. Acadian. White. 
-9A. French. White. 
-10A. L2 French. Asian.
 
 
 ```{r ST: create df}
@@ -652,20 +773,179 @@ edu_df_long <- st_df %>%
   mutate(id = 1: nrow(st_df)) %>%  
   gather(key = "accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
   convert_as_factor(id, accent)
+
+
+
+```
+
+
+```{r ST - Professional}
+
+prof_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_prof <- get_anova_table(anova_test(data = prof_df_long, dv = value, wid = id, within = accent))
+  
+prof_pw <- prof_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+p_prof <- ggboxplot(prof_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(prof_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_prof, detailed = TRUE),
+    caption = get_pwc_label(prof_pw),
+    y = 'Score',
+    title = 'Professional'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+
+```
+
+```{r ST - Leadership}
+lead_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_lead <- get_anova_table(anova_test(data = lead_df_long, dv = value, wid = id, within = accent))
+  
+prof_pw <- lead_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+p_lead <- ggboxplot(lead_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(prof_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_lead, detailed = TRUE),
+    caption = get_pwc_label(prof_pw),
+    y = 'Score',
+    title = 'Good leader'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+```
+```{r ST - Educated}
+edu_df_long %>% 
+  group_by(accent) %>%
+  get_summary_stats(value, type = "mean_sd")  
+res_edu <- get_anova_table(anova_test(data = edu_df_long, dv = value, wid = id, within = accent))
+  
+prof_pw <- edu_df_long %>%
+  pairwise_t_test(
+    value ~ accent, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    ) %>% 
+  mutate(y.position = c(seq(12,21, by = 1))) 
+p_edu <- ggboxplot(edu_df_long, x = 'accent', y = "value", fill = "accent") + 
+  rremove('legend') + 
+  rremove('xlab') + 
+  stat_pvalue_manual(prof_pw, vjust = 0.5, bracket.nudge.y = 0.5, size = 3, hide.ns = TRUE) + 
+  labs(
+    subtitle = get_test_label(res_edu, detailed = TRUE),
+    caption = get_pwc_label(prof_pw),
+    y = 'Score',
+    title = 'Educated'
+  ) + 
+  theme(plot.caption = element_text(size=12),
+        plot.subtitle=element_text(size=13, vjust= 1, face="italic", color="black"),
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size=15, face = 'bold'))
+```
+
+```{r ST - Plot, fig.height= 8, fig.width= 8}
+cowplot::plot_grid(p_prof,p_lead, p_edu)
+
+```
+```{r ST - Table}
+res_tb_st <- matrix(NA, 3, 7)
+
+res_tb_st[1, 1:5] <- table_filler(prof_df_long)
+res_tb_st[2, 1:5] <- table_filler(lead_df_long)
+res_tb_st[3, 1:5] <- table_filler(edu_df_long)
+
+
+res_tb_st[, 6] <- c(res_prof$F, res_lead$F, res_edu$F)
+res_tb_st[, 7] <- c(res_prof$p, res_lead$p, res_edu$p)
+res_tb_st <- as.data.frame(res_tb_st)
+colnames(res_tb_st) <- c('mean_Acadian', 'mean_African', 'mean_l2','mean_French', 'mean_Quebec', 'F', 'p-value')
+rownames(res_tb_st) <- c('Professional', 'Good Leader', 'Educated')
+res_tb_st
 ```
 
 
 
 
+# Part II: Recording Evaluation: Speaker Race and Accent
+
+
+
+1A: Quebec. White.
+2A: French. Asian.
+3A. Acadian. Asian.
+4A. L2 French. White.
+5A. African. Asian. 
+6A. Quebec. Asian.
+7A. African. White. 
+8A. Acadian. White. 
+9A. French. White. 
+10A. L2 French. Asian.
+
 
 ```{r}
-test_df_2 <- beautiful_fr %>% 
-  transmute(Quebec = `1A_1` + `6A_1`, 
-         French = `2A_1` + `9A_1`, 
-         Acadian = `3A_1` + `8A_1`, 
-         L2_French = `4A_1` + `10A_1`, 
-         African = `5A_1` + `7A_1`
-        )
+recording_df_agg <- recording_df %>%  
+  mutate(id = 1:nrow(recording_df)) %>% 
+  transmute(
+    rec_1 = rowSums(.[2:10]),
+    rec_2 = rowSums(.[11:19]),
+    rec_3 = rowSums(.[20:28]),
+    rec_4 = rowSums(.[29:37]),
+    rec_5 = rowSums(.[38:46]),
+    rec_6 = rowSums(.[47:55]),
+    rec_7 = rowSums(.[56:64]),
+    rec_8 = rowSums(.[65:73]),
+    rec_9 = rowSums(.[74:82]),
+    rec_10 = rowSums(.[83:91])
+  ) %>%  
+  mutate(id = 1:nrow(recording_df)) %>% 
+  relocate(id, .before = rec_1) 
+
+
+recording_df_agg_long <- recording_df_agg %>%  
+  mutate(id = as.factor(id)) %>% 
+  pivot_longer(-c(id), values_to = "score", names_to = "rec_index") %>% 
+  mutate(speaker_race = ifelse(rec_index %in% c('rec_1', 'rec_4', 'rec_7', 'rec_8', 'rec_9'), 'white', 'asian'), 
+         speaker_accent = case_when(rec_index %in% c('rec_1', 'rec_6') ~ 'Quebec', 
+                                    rec_index %in% c('rec_2', 'rec_9') ~ 'French',
+                                    rec_index %in% c('rec_3', 'rec_8') ~ 'Acadian',
+                                    rec_index %in% c('rec_4', 'rec_10') ~ 'L2',
+                                    rec_index %in% c('rec_5', 'rec_7') ~ 'African'))
+  
+```
+
+
+
+### two-smaple test on speaker race
+
+```{r}
+ncol(recording_df)
 ```
 
 
