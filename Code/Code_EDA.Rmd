@@ -945,7 +945,66 @@ recording_df_agg_long <- recording_df_agg %>%
 ### two-smaple test on speaker race
 
 ```{r}
-ncol(recording_df)
+w_df <- recording_df_agg_long %>%
+  filter(speaker_race == "white")
+# white speakers
+a_df <- recording_df_agg_long %>%
+  filter(speaker_race == "asian")
+
+# one-sided t-test
+t.test(w_df$score, a_df$score, alternative= "greater", paired = TRUE) 
+
+# one-sided Wilcoxon test
+wilcox.test(w_df$score, a_df$score, alternative= "greater", paired = TRUE)
+```
+```{r Two-way repeated measures ANOVA, warning=FALSE}
+res.aov.twoway <- anova_test(
+  data = recording_df_agg_long, dv = score, wid = id,
+  within = c(speaker_accent, speaker_race)
+  )
+get_anova_table(res.aov.twoway)  
+```
+
+
+
+```{r Two-way repeated measures ANOVA - result}
+
+# pairwise t-test
+pwc <- recording_df_agg_long %>%
+  group_by(speaker_accent) %>%
+  pairwise_t_test(
+    score ~ speaker_race, paired = TRUE,
+    p.adjust.method = "bonferroni",
+    alternative = 'greater'
+    )
+
+
+pwc <- pwc %>% add_xy_position(x = "speaker_accent")
+ggboxplot(
+  recording_df_agg_long, x = "speaker_accent", y = "score",
+  color = "speaker_race", palette = "jco"
+  ) + 
+  stat_pvalue_manual(pwc, tip.length = 0, hide.ns = TRUE) +
+  labs(
+    subtitle = get_test_label(res.aov.twoway, detailed = TRUE),
+    caption = get_pwc_label(pwc),
+    y = 'Score',
+    x = 'Speaker Accent'
+  ) + 
+  theme(axis.title.x = element_text(size = 15,face = 'bold'),
+        axis.title.y = element_text(size = 15,face = 'bold'),
+        axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15))
+pwc
+```
+
+```{r Examine the group of European and English}
+recording_df_long %>% 
+  filter(accent == 'European' |
+         accent == 'English') %>% 
+  group_by(accent, race) %>%
+  summarise(mu = mean(score),
+            sd = sd(score))
 ```
 
 
