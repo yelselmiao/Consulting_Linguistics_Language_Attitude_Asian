@@ -395,16 +395,8 @@ beatiful_fr_race <-
   mutate(id = 1:nrow(recording_df)) 
 
 
-  # short to long 
-beautiful_fr_long_race <- beatiful_fr_race %>%  
-  gather(key = "Race", value = "value", White, Asian) %>%
-  convert_as_factor(id, Race)
-
-
-beautiful_fr_long_race %>%  
-  group_by(Race) %>% 
-  get_summary_stats(value, type = 'mean_sd')
-# Note: only 83 people complete the survey
+beatiful_fr_race %>% 
+  summarise(across(White:Asian, mean, na.rm = TRUE))
 
 
 # one-sided t-test
@@ -471,19 +463,8 @@ und_df_race <- recording_df %>%
   mutate(id = 1:nrow(recording_df)) 
 
 
-  # short to long 
-und_long_race <- und_df_race %>%  
-  select(white_easy_und, asian_easy_und, id) %>% 
-  rename(White = white_easy_und,
-         Asian = asian_easy_und) %>% 
-  gather(key = "Race", value = "value", White, Asian) %>%
-  convert_as_factor(id, Race)
-
-
-und_long_race %>%  
-  group_by(Race) %>% 
-  get_summary_stats(value, type = 'mean_sd')
-# Note: only 83 people complete the survey
+und_df_race %>% 
+  summarise(across(white_easy_und:asian_good_teacher, mean, na.rm = TRUE))
 
 
 # one-sided t-test
