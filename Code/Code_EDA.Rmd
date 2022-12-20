@@ -317,6 +317,8 @@ data %>%
 ```{r Keep Recording Evluation Columns}
 recording_df <- data %>% 
   select(c(1:90)) 
+
+
 ```
 
 
@@ -327,7 +329,7 @@ beautiful_fr <-
   recording_df %>% 
   select(seq(1, 82, 9)) %>% 
   transmute(Quebec = `1A_1` + `6A_1`, 
-         French = `2A_1` + `9A_1`, 
+         European = `2A_1` + `9A_1`, 
          Acadian = `3A_1` + `8A_1`, 
          `L2 French` = `4A_1` + `10A_1`, 
          African = `5A_1` + `7A_1`
@@ -337,7 +339,7 @@ beautiful_fr <-
 
 # short to long 
 beautiful_fr_long <- beautiful_fr %>%  
-  gather(key = "Accent", value = "value", Quebec, French, Acadian, `L2 French`, African) %>%
+  gather(key = "Accent", value = "value", Quebec, European, Acadian, `L2 French`, African) %>%
   convert_as_factor(id, Accent)
 
 
@@ -929,23 +931,31 @@ st_race_df <-recording_df %>%
 st_race_df %>% 
   summarise(across(white_prof:asian_edu, mean, na.rm = TRUE))
 
-# one-sided t-test
+# two-sided t-test
 t.test(st_race_df$white_prof, st_race_df$asian_prof, alternative= "two.side", paired = TRUE) 
 
-# one-sided Wilcoxon test
+# two-sided Wilcoxon test
 wilcox.test(st_race_df$white_prof, st_race_df$asian_prof, alternative= "two.side", paired = TRUE)
 
 
-# one-sided t-test
+# two-sided t-test
 t.test(st_race_df$white_leader, st_race_df$asian_leader, alternative= "two.side", paired = TRUE) 
 
-# one-sided Wilcoxon test
+# two-sided Wilcoxon test
 wilcox.test(st_race_df$white_leader, st_race_df$asian_leader, alternative= "two.side", paired = TRUE)
 
+
 # one-sided t-test
-t.test(st_race_df$white_edu, st_race_df$asian_edu, alternative= "two.side", paired = TRUE) 
+t.test(st_race_df$white_leader, st_race_df$asian_leader, alternative= "less", paired = TRUE) 
 
 # one-sided Wilcoxon test
+wilcox.test(st_race_df$white_leader, st_race_df$asian_leader, alternative= "less", paired = TRUE)
+
+
+# two-sided t-test
+t.test(st_race_df$white_edu, st_race_df$asian_edu, alternative= "two.side", paired = TRUE) 
+
+# two-sided Wilcoxon test
 wilcox.test(st_race_df$white_edu, st_race_df$asian_edu, alternative= "two.side", paired = TRUE) 
 ```
 
@@ -1105,7 +1115,7 @@ recording_df_agg_long <- recording_df_agg %>%
   pivot_longer(-c(id), values_to = "score", names_to = "rec_index") %>% 
   mutate(speaker_race = ifelse(rec_index %in% c('rec_1', 'rec_4', 'rec_7', 'rec_8', 'rec_9'), 'white', 'asian'), 
          speaker_accent = case_when(rec_index %in% c('rec_1', 'rec_6') ~ 'Quebec', 
-                                    rec_index %in% c('rec_2', 'rec_9') ~ 'French',
+                                    rec_index %in% c('rec_2', 'rec_9') ~ 'European',
                                     rec_index %in% c('rec_3', 'rec_8') ~ 'Acadian',
                                     rec_index %in% c('rec_4', 'rec_10') ~ 'L2',
                                     rec_index %in% c('rec_5', 'rec_7') ~ 'African'))
