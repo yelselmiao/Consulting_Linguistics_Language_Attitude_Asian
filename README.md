@@ -1,1 +1,3 @@
-# Linguistics_Language_Attitude_Asian
+# Language and racial attitudes toward French Varieties 
+
+## Asian Speakers and White Speakers
