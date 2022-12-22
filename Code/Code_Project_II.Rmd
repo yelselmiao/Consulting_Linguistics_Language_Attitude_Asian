@@ -1,0 +1,17 @@
+---
+title: "Code_Project_II"
+output: github_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r Load Package}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(rstatix))
+suppressPackageStartupMessages(library(ggpubr))
+```
+
+```{r Load Data}
+
+```
+
