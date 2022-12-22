@@ -15,7 +15,6 @@ suppressPackageStartupMessages(library(ggpubr))
 #Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24 <- read_excel("Data/Les différents accents du français - Asians+Whites_October 26, 2022_08.24.xlsx")
 raw_data <- Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24
 
-
 print(raw_data[1,])
 ```
 
@@ -99,7 +98,7 @@ data %>%
 ```
 
 ```{r Country of Birth}
-# born in Canda
+# born in Canada
 data %>%  
   select(country_of_birth) %>%  
   mutate(Canada = ifelse(country_of_birth == 'Canada', TRUE, FALSE)) %>% 
