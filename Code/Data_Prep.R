@@ -1,5 +1,5 @@
 
-# wrap the data cleaning codes for the second project
+# Wrap some of the data cleaning codes for the second project
 raw_data <- Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24
 
 data <- raw_data[-1, ]
@@ -46,6 +46,48 @@ data <- data %>%
 
 data <- data %>% 
   mutate_if(is.character, as.factor)
+
+# categorize the country of birth column 
+data <- data %>%  
+  mutate(continent_of_birth = case_when(country_of_birth %in% c('China',
+                                                       'India',
+                                                       'South Korea',
+                                                       'Japan',
+                                                       'Pakistan',
+                                                       'Philippines') ~ 'Asia',
+                               country_of_birth %in% c('Mauritius', 'Egypt', 'Nigeria') ~ 'Africa',
+                               country_of_birth %in% c(
+                                 'United Kingdom of Great Britain and Northern Ireland',
+                                 'Czech Republic',
+                                 'Italy',
+                                 'Germany'
+                               ) ~ 'Europe',
+                               country_of_birth %in% c('United States of America', 'Brazil', 'Mexico') ~ 'America',
+                               country_of_birth == 'Canada' ~ 'Canada'))
+
+
+# Grow up in Canada or not 
+data <- data %>%  
+  mutate(grew_up_canada = ifelse(str_detect(grow_up_country, "Canada|canada"), TRUE, FALSE), )
+
+
+
+# Append the language number pyramid 
+data <- data %>%
+  mutate(
+    year_interval = case_when(
+      year_of_french <= 5 ~ '0-5',
+      year_of_french > 5 &
+        year_of_french <= 10 ~ '5-10',
+      year_of_french > 10 &
+        year_of_french <= 15 ~ '10-15',
+      year_of_french > 15 ~ '15+'
+    )
+  )
+
+
+
+
 
 
 
