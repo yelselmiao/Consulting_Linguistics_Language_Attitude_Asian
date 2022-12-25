@@ -47,7 +47,7 @@ data <- data %>%
 data <- data %>% 
   mutate_if(is.character, as.factor)
 
-# categorize the country of birth column 
+# categorize the country of birth column  
 data <- data %>%  
   mutate(continent_of_birth = case_when(country_of_birth %in% c('China',
                                                        'India',
