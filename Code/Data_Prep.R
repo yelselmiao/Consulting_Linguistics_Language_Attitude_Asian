@@ -66,13 +66,13 @@ data <- data %>%
                                country_of_birth == 'Canada' ~ 'Canada'))
 
 
-# Grow up in Canada or not 
+# Born in Canada or not 
 data <- data %>%  
-  mutate(grew_up_canada = ifelse(str_detect(grow_up_country, "Canada|canada"), TRUE, FALSE), )
+  mutate(born_in_canada = ifelse(str_detect(country_of_birth, "Canada|canada"), TRUE, FALSE), )
 
 
 
-# Append the language number pyramid 
+# Append the spoken language number pyramid 
 data <- data %>%
   mutate(
     year_interval = case_when(
@@ -86,8 +86,37 @@ data <- data %>%
   )
 
 
+# ethnicity of participant
+data <- data %>% 
+  select(ethnic_group, ethnic_group_other) %>% 
+  mutate(
+    ethnic_group_cate = case_when(
+      ethnic_group %in% c('Latino', 'Latino-Américain', 'Noir') ~ 'Latio or Black',
+      ethnic_group == 'White' ~ 'White',
+      ethnic_group == 'Other. Specify:' &
+        ethnic_group_other == 'Taïwanaise' ~ 'Asian',
+      ethnic_group == 'Other. Specify:' &
+        ethnic_group_other == 'Slavic (like Russian, Ukranian)	' ~ 'White',
+      ethnic_group == 'Other. Specify:' &
+        ethnic_group_other %notin% c('Taïwanaise', 'Slavic (like Russian, Ukranian') ~ 'Mixed',
+      TRUE ~ 'Asian',
+    )
+  ) %>%  
+  mutate(ethnic_group_Asian_or_not = case_when(ethnic_group_cate == 'Asian' ~ 'Pure Asian', 
+                                               ethnic_group_other %in% c('Mix between Korean and Canadian.', 
+                                                                         'Metis: White and Chinese.', 
+                                                                         'White and Chinese', 
+                                                                         'White, Korean and Caribbean', 
+                                                                         'Black and Southeast Asian', 
+                                                                         'White/Chinese', 
+                                                                         'Blanc, Japonais') ~ 'Mixed Asian', 
+                                               TRUE ~ 'Non-Asian')) 
 
 
+
+# months of living in French-speaking place  
+levels(data$month_live_in_fr_env) <- c("1 - 3", "4 - 6", "7 - 12", "< 1", "> 12")
+data$month_live_in_fr_env <- factor(data$month_live_in_fr_env, levels = c("< 1", "1 - 3", "4 - 6", "7 - 12", "> 12")) 
 
 
 
