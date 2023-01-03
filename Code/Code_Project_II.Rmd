@@ -125,6 +125,12 @@ data_agg_long %>%
 ```
 
 ```{r Country of Brith - Continent}
+
+# data %>% 
+#   group_by(continent) %>% 
+#   tally()
+
+
 data_agg_long %>%  
   mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>% 
   group_by(continent_cate, speaker_accent) %>%
@@ -240,8 +246,23 @@ data %>%
 
 
 
-data_agg_long
 
+
+
+
+# due to the restriction of sample size,  
+# 1. pure Asian + mixed Asian vs. Non-Asian
+# 2. Pure Asian vs. Non-Asian
+
+
+# 2. Pure Asian vs. Non-Asian
+data_agg_long %>%  
+  drop_na(ethnic_group_Asian_or_not) %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  
+
+# 
 ```
 
 
