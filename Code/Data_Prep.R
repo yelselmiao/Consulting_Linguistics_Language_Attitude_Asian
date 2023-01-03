@@ -1,5 +1,8 @@
 
 # Wrap some of the data cleaning codes for the second project
+
+
+# Clean the socio-demographic columns 
 raw_data <- Les_diffe_rents_accents_du_franc_ais_Asians_Whites_October_26_2022_08_24
 
 data <- raw_data[-1, ]
@@ -68,8 +71,16 @@ data <- data %>%
 
 # Born in Canada or not 
 data <- data %>%  
-  mutate(born_in_canada = ifelse(str_detect(country_of_birth, "Canada|canada"), TRUE, FALSE), )
+  mutate(born_in_canada = ifelse(str_detect(country_of_birth, "Canada|canada"), TRUE, FALSE) )
 
+
+# Country of birth - by continent
+data <- data %>%  
+  mutate(continent = case_when(country_of_birth %in% c('China', 'India', 'South Korea', 'Japan', 'Pakistan', 'Philippines') ~ 'Asia', 
+                               country_of_birth %in% c('Mauritius', 'Egypt', 'Nigeria') ~ 'Africa',
+                               country_of_birth %in% c('United Kingdom of Great Britain and Northern Ireland', 'Czech Republic', 'Italy', 'Germany') ~ 'Europe',
+                               country_of_birth %in% c('United States of America', 'Brazil', 'Mexico') ~ 'America', 
+                               country_of_birth == 'Canada' ~ 'Canada')) 
 
 
 # Append the spoken language number pyramid 
@@ -88,7 +99,6 @@ data <- data %>%
 
 # ethnicity of participant
 data <- data %>% 
-  select(ethnic_group, ethnic_group_other) %>% 
   mutate(
     ethnic_group_cate = case_when(
       ethnic_group %in% c('Latino', 'Latino-Américain', 'Noir') ~ 'Latio or Black',
@@ -119,7 +129,51 @@ levels(data$month_live_in_fr_env) <- c("1 - 3", "4 - 6", "7 - 12", "< 1", "> 12"
 data$month_live_in_fr_env <- factor(data$month_live_in_fr_env, levels = c("< 1", "1 - 3", "4 - 6", "7 - 12", "> 12")) 
 
 
+# year of speaking French
+data <- data %>%
+  mutate(
+    year_interval = case_when(
+      year_of_french <= 5 ~ '0-5',
+      year_of_french > 5 &
+        year_of_french <= 10 ~ '5-10',
+      year_of_french > 10 &
+        year_of_french <= 15 ~ '10-15',
+      year_of_french > 15 ~ '15+'
+    )
+  )
 
+
+
+# Sum up the score 
+data <- data %>%  
+  mutate(
+    rec_1 = rowSums(.[1:9]),
+    rec_2 = rowSums(.[10:18]),
+    rec_3 = rowSums(.[19:27]),
+    rec_4 = rowSums(.[28:36]),
+    rec_5 = rowSums(.[37:45]),
+    rec_6 = rowSums(.[46:54]),
+    rec_7 = rowSums(.[55:63]),
+    rec_8 = rowSums(.[64:72]),
+    rec_9 = rowSums(.[73:81]),
+    rec_10 = rowSums(.[82:90])
+  ) %>%  
+  mutate(id = 1:nrow(data)) %>% 
+  relocate(id, .before = rec_1) 
+
+
+
+# convert to long format
+data_agg_long <- data %>%  
+  select(c(119:129)) %>%  
+  pivot_longer(-c(id), values_to = "score", names_to = "rec_index") %>% 
+  left_join(data %>% select(- c(1:90, 120:129)), by = 'id') %>% 
+  mutate(speaker_race = ifelse(rec_index %in% c('rec_1', 'rec_4', 'rec_7', 'rec_8', 'rec_9'), 'white', 'asian'), 
+         speaker_accent = case_when(rec_index %in% c('rec_1', 'rec_6') ~ 'Quebec', 
+                                    rec_index %in% c('rec_2', 'rec_9') ~ 'European',
+                                    rec_index %in% c('rec_3', 'rec_8') ~ 'Acadian',
+                                    rec_index %in% c('rec_4', 'rec_10') ~ 'L2',
+                                    rec_index %in% c('rec_5', 'rec_7') ~ 'African'))
 
 
 
