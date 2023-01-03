@@ -244,15 +244,86 @@ data %>%
   group_by(ethnic_group_Asian_or_not) %>% 
   tally()
 
+##################### Asian, Latino or Black, Mixed, WHite
+data_agg_long %>%
+  drop_na(ethnic_group) %>% 
+  group_by(ethnic_group_cate, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=ethnic_group_cate))+
+  geom_point() + 
+  geom_line(aes(group = ethnic_group_cate)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Ethnic Group of Participants') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
 
 
 
 
+data_agg_long %>%
+  drop_na(ethnic_group) %>% 
+  ggplot(aes(y = score, x = speaker_accent, fill=ethnic_group_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Ethnic Group of Participants') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
 
 
+##################### Pure Asian, Mixed Asian, non-Asian 
+data_agg_long %>%
+  drop_na(ethnic_group) %>% 
+  group_by(ethnic_group_Asian_or_not, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=ethnic_group_Asian_or_not))+
+  geom_point() + 
+  geom_line(aes(group = ethnic_group_Asian_or_not)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Ethnic Group of Participants') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+
+
+
+data_agg_long %>%
+  drop_na(ethnic_group) %>% 
+  ggplot(aes(y = score, x = speaker_accent, fill=ethnic_group_Asian_or_not)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Ethnic Group of Participants') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+
+# statistical tests 
 # due to the restriction of sample size,  
 # 1. pure Asian + mixed Asian vs. Non-Asian
 # 2. Pure Asian vs. Non-Asian
+# 3. Pure Asian vs.mixed Asian 
+
+
+# 1. pure Asian + mixed Asian vs. Non-Asian
+data_agg_long %>%  
+  mutate(ethic_group_reorder = ifelse(ethnic_group_Asian_or_not == 'Non-Asian', 'Non-Asian', 'Asian')) %>%  
+  group_by(speaker_accent) %>% 
+  wilcox_test(score ~ ethic_group_reorder, alternative = 'two.sided', paired = FALSE)  
+
 
 
 # 2. Pure Asian vs. Non-Asian
@@ -262,46 +333,97 @@ data_agg_long %>%
   group_by(speaker_accent) %>%  
   wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  
 
-# 
+
+
+
+# since the sample size should be at least 6 for Wilcox 
+# 3. Pure Asian vs.mixed Asian 
+data_agg_long %>%  
+  filter(ethnic_group_Asian_or_not != 'Non-Asian') %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  
 ```
 
 
-
-```{r}
-data %>%  
-  select(c(1:95, 98:105, 108:114)) %>% 
-  select(ethnic_group, ethnic_group_other)
-
-
-
-unique(data$ethnic_group)  
-
-
-data %>%  
-  group_by(ethnic_group) %>%  
+```{r Languages spoken, fig.height = 3, fig.width = 6}
+data %>% 
+  group_by(num_of_language) %>% 
   tally()
 
+data_agg_long %>%
+  mutate(num_of_language = as.numeric(num_of_language)) %>%  
+  ggplot(aes(x = num_of_language, y = score)) +
+  geom_jitter() +
+  scale_x_continuous(breaks = seq(0, 5, by = 1)) + 
+  geom_smooth(method = lm) +
+  facet_grid( ~ speaker_accent) +
+  theme_bw() + 
+  labs(x = 'Number of Languages Spoken', y = 'Score') + 
+  scale_colour_discrete('Number of Language(s) Spoken') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
 
-data %>% 
-  filter(ethnic_group == 'Other. Specify:') %>% 
-  select(ethnic_group, ethnic_group_other) 
 
-
-
-data %>% 
-  mutate(ethinic_asian = ifesle(str_detect(ethnic_group_other, 
-                                           
-                                           
-                                           
-                                           
+# treat num_of_language as rank
+data_agg_long %>% 
+  drop_na(num_of_language) %>% 
+   mutate(num_of_language = as.numeric(num_of_language)) %>% 
+   group_by(speaker_accent) %>% 
+   summarise(spear_cor = round(cor(score, num_of_language, method = 'spearman'),3),
+             spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
 ```
 
 
 
-```{r}
+```{r Year of Studying French, fig.height = 3, fig.width = 6}
 data %>% 
-  filter(ethnic_group == 'Other. Specify:') %>% 
-  select(ethnic_group, ethnic_group_other ) 
+  group_by(year_interval) %>% 
+  tally()
+
+# viz
+data_agg_long %>%
+  mutate(year_of_french = as.numeric(year_of_french)) %>% 
+  ggplot(aes(x = year_of_french, y = score)) +
+  geom_jitter() +
+  geom_smooth(method = 'glm') +
+  facet_grid( ~ speaker_accent) +
+  theme_bw() + 
+  labs(x = 'Years of Learning French', y = 'Score') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+
+# corr
+data_agg_long %>%
+  mutate(year_of_french = as.numeric(year_of_french)) %>% 
+  group_by(speaker_accent) %>% 
+  summarise(pearson_cor = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$estimate,3),
+            pearson_p = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$p.value,3),
+            )
+
+# encode year interval into rank
+data_agg_long %>% 
+  drop_na(year_interval) %>% 
+  mutate(
+    study_year_group_encoded = case_when(
+      year_interval == "0-5" ~ 1,
+      year_interval == "5-10" ~2,
+      year_interval == "10-15" ~ 3,
+      year_interval == "15+" ~ 4
+    )
+  ) %>%  
+  group_by(speaker_accent) %>% 
+  summarise(spearman_cor = round(cor.test(study_year_group_encoded, score, method = 'spearman', exact = FALSE)$estimate,3),
+            spearman_p = round(cor.test(study_year_group_encoded, score, method = 'spearman', exact = FALSE)$p.value,3),
+            kendall_cor = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$estimate,3),
+            kendall_p = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$p.value,3))
+          
 ```
 
 
