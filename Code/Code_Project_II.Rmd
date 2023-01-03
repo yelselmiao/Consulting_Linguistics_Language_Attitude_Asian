@@ -5,13 +5,306 @@ editor_options:
   chunk_output_type: inline
 ---
 
+# Setup
 ```{r Load Package}
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(rstatix))
 suppressPackageStartupMessages(library(ggpubr))
+`%notin%` <- Negate(`%in%`)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
 ```
 
-```{r Load Data}
+```{r Load Data, warning=FALSE}
+source(paste0(here::here(), 
+            "/Code/Data_Prep.R"))
+```
+
+# Analysis of Socio-demographic Factors
+* gender  
+* age  
+* country of birth (birthplace)  
+* grow up province (place participant grew up; it should be country, not province)  
+* ethnic group (racial group)  
+* number of spoken language (languages spoken)  
+* mother tongue (first language)  
+* years of studying French  
+* French-speaking place that participants used to live n  
+* months of living in French-speaking place  
+* preferred type of french to learn (preferred variety of French)  
+* origin of French teachers  
+
+
+
+## Effect of Speaker Accent 
+
+
+```{r Gender}
+# due to statistical power, only female and male are included in the test 
+ # data %>% 
+ #  group_by(gender) %>% 
+ #  tally() %>%  
+ #  mutate(prop = scales::percent(n/nrow(data)))
+
+
+data_agg_long  %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  group_by(gender, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=gender))+
+  geom_point() + 
+  geom_line(aes(group = gender)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Gender') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+
+data_agg_long %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  ggplot(aes(y = score, x = speaker_accent, fill=gender)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Gender') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5))  
+
+
+data_agg_long %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  group_by(speaker_accent) %>% 
+  wilcox_test(score ~ gender, alternative = 'two.sided', paired = FALSE)  
+
+
+data_agg_long %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  group_by(speaker_accent) %>% 
+  wilcox_test(score ~ gender, alternative = 'less', paired = FALSE)  
+```
+
+```{r Country of Birth - Canada or not}
+data_agg_long %>%
+  filter(is.na(born_in_canada) == FALSE) %>%
+  group_by(born_in_canada, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=born_in_canada))+
+  geom_point() + 
+  geom_line(aes(group = born_in_canada)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Born in Canada') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+data_agg_long %>%
+  filter(is.na(born_in_canada) == FALSE) %>%
+  ggplot(aes(y = score, x = speaker_accent, fill=born_in_canada)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Born in Canada') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+data_agg_long %>%
+  filter(is.na(born_in_canada) == FALSE) %>%
+  group_by(speaker_accent) %>% 
+  wilcox_test(score ~ born_in_canada, paired = FALSE)
+```
+
+```{r Country of Brith - Continent}
+data_agg_long %>%  
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>% 
+  group_by(continent_cate, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=continent_cate))+
+  geom_point() + 
+  geom_line(aes(group = continent_cate)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Country/Continent of Birth') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+  
+data_agg_long %>%  
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>% 
+  group_by(continent_cate, speaker_accent) %>%
+  ggplot(aes(y = score, x = speaker_accent, fill=continent_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Born in Canada') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5))       
+
+# KW test         
+data_agg_long %>%  
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>%
+  group_by(speaker_accent) %>%
+  kruskal_test(score ~ continent_cate)  
+
+
+
+# post hoc 
+L2 <- data_agg_long %>%
+  mutate(continent_cate = ifelse(
+    continent %in% c('Africa', 'Europe', 'America'),
+    'Other',
+    continent
+  ))  %>%
+  filter(speaker_accent == 'L2')
+FSA::dunnTest(score ~ continent_cate, data = L2, method = 'holm')
+```
+
+
+
+
+
+
+```{r Grew up in Canada - by Province}
+data %>%  
+  drop_na(grow_up_province)  %>% 
+  group_by(grow_up_province) %>% 
+  tally()
+
+# I will aggregate Ontario (4), Quebec (2), and Saskatchewan (2) 
+
+
+
+data_agg_long %>%
+  drop_na(grow_up_province) %>% 
+  mutate(grow_up_province_cate  = ifelse(grow_up_province %in% c('Ontario', 'Quebec', 'Saskatchewan'), 'Ontario, Quebec, or Saskatchewan', ifelse(grow_up_province == 'BC', 'BC', 'Alberta'))) %>%  
+  group_by(grow_up_province_cate, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=grow_up_province_cate))+
+  geom_point() + 
+  geom_line(aes(group = grow_up_province_cate)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Grow up Province') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+data_agg_long %>%
+  drop_na(grow_up_province) %>% 
+  mutate(grow_up_province_cate  = ifelse(grow_up_province %in% c('Ontario', 'Quebec', 'Saskatchewan'), 'Ontario, Quebec, or Saskatchewan', ifelse(grow_up_province == 'BC', 'BC', 'Alberta'))) %>%  
+  ggplot(aes(y = score, x = speaker_accent, fill=grow_up_province_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Grow up Province') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+# KW test         
+data_agg_long %>%  
+  drop_na(grow_up_province) %>% 
+  mutate(grow_up_province_cate  = ifelse(grow_up_province %in% c('Ontario', 'Quebec', 'Saskatchewan'), 'Ontario, Quebec, or Saskatchewan', ifelse(grow_up_province == 'BC', 'BC', 'Alberta'))) %>%  
+  group_by(speaker_accent) %>%
+  kruskal_test(score ~ grow_up_province_cate)  
+```
+
+
+```{r Ethnic group}
+data %>%  
+  group_by(ethnic_group_cate) %>% 
+  tally()
+
+data %>%  
+  group_by(ethnic_group_Asian_or_not) %>% 
+  tally()
+
+
+
+data_agg_long
 
 ```
+
+
+
+```{r}
+data %>%  
+  select(c(1:95, 98:105, 108:114)) %>% 
+  select(ethnic_group, ethnic_group_other)
+
+
+
+unique(data$ethnic_group)  
+
+
+data %>%  
+  group_by(ethnic_group) %>%  
+  tally()
+
+
+data %>% 
+  filter(ethnic_group == 'Other. Specify:') %>% 
+  select(ethnic_group, ethnic_group_other) 
+
+
+
+data %>% 
+  mutate(ethinic_asian = ifesle(str_detect(ethnic_group_other, 
+                                           
+                                           
+                                           
+                                           
+```
+
+
+
+```{r}
+data %>% 
+  filter(ethnic_group == 'Other. Specify:') %>% 
+  select(ethnic_group, ethnic_group_other ) 
+```
+
+
+
+
+
+
+
+
+
+gender
+age
+country of birth (birthplace)
+grow up province (place participant grew up; it should be country, not province)
+ethnic group (racial group)
+number of spoken language (languages spoken)
+mother tongue (first language)
+years of studying French
+French-speaking place that participants used to live n
+months of living in French-speaking place
+preferred type of french to learn (preferred variety of French)
+origin of French teachers
+
+
+
+
 
