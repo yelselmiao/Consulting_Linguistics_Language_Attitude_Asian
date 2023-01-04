@@ -245,6 +245,8 @@ live_in_french_env_df <- tibble::rownames_to_column(live_in_french_env_df, "Area
 live_in_french_env_df %>% 
   mutate(prop = scales::percent(V1/sum(V1),1))
 ```
+
+
 ```{r Months of Living in French-speaking areas}
 levels(data$month_live_in_fr_env) <- c("1 - 3", "4 - 6", "7 - 12", "< 1", "> 12")
 data$month_live_in_fr_env <- factor(data$month_live_in_fr_env, levels = c("< 1", "1 - 3", "4 - 6", "7 - 12", "> 12")) 
