@@ -83,7 +83,7 @@ data <- data %>%
                                country_of_birth == 'Canada' ~ 'Canada')) 
 
 
-# Append the spoken language number pyramid 
+# Append the years of studying French pyramid 
 data <- data %>%
   mutate(
     year_interval = case_when(
@@ -95,6 +95,8 @@ data <- data %>%
       year_of_french > 15 ~ '15+'
     )
   )
+
+
 
 
 # ethnicity of participant
