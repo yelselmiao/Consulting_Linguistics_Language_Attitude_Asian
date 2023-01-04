@@ -423,10 +423,16 @@ data_agg_long %>%
             spearman_p = round(cor.test(study_year_group_encoded, score, method = 'spearman', exact = FALSE)$p.value,3),
             kendall_cor = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$estimate,3),
             kendall_p = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$p.value,3))
+
+
+
           
 ```
 
 
+```{r}
+
+```
 
 
 
