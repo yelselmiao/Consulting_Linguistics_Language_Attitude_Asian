@@ -424,20 +424,84 @@ data_agg_long %>%
             kendall_cor = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$estimate,3),
             kendall_p = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$p.value,3))
 
-
-
-          
 ```
 
 
-```{r}
+```{r French-spkeaing Place}
+data %>% 
+  group_by(french_speaking_place) %>% 
+  tally()
+
+
+
 
 ```
 
 
+```{r Months of living in French-speaking Place}
+data %>% 
+  group_by(month_live_in_fr_env) %>% 
+  tally()
+
+
+# due to the sample size, we will combine the group of 4-6 years and 
+```
 
 
 
+```{r Preferred Variety of French}
+data %>% 
+  group_by(pref_french) %>% 
+  tally()
+
+
+data %>% 
+  filter(pref_french == 'Other variety of French, please specify:' | is.na(pref_french) == TRUE) %>% 
+  select(pref_french_other)
+
+
+
+data_agg_long %>%
+  filter(!pref_french == 'Other variety of French, please specify:' & !is.na(pref_french) == TRUE) %>% 
+  group_by(pref_french, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=pref_french))+
+  geom_point() + 
+  geom_line(aes(group = pref_french)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Preferred Variety of French') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+
+
+
+data_agg_long %>%
+  filter(!pref_french == 'Other variety of French, please specify:' & !is.na(pref_french) == TRUE) %>% 
+  ggplot(aes(y = score, x = speaker_accent, fill=pref_french)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Preferred Variety of French') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+
+
+
+# KW test         
+data_agg_long %>%  
+  filter(!pref_french == 'Other variety of French, please specify:' & !is.na(pref_french) == TRUE) %>% 
+  group_by(speaker_accent) %>%
+  kruskal_test(score ~ pref_french)  
+```
 
 
 gender
