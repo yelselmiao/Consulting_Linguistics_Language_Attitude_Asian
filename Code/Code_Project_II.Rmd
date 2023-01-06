@@ -435,6 +435,20 @@ data %>%
 
 
 
+data %>%  
+  mutate(french_speaking_place_cate =  case_when(french_speaking_place == 'France' | french_speaking_place == 'France, Elsewhere? if so please specify:'~'France', 
+                                                 french_speaking_place == 'Quebec' | french_speaking_place == 'Quebec, Elsewhere? if so please specify:'~'Quebec', 
+                                                 str_detect(french_speaking_place, 'I have never stayed in a French-speaking context.'~'never') ~' never', 
+                                                 french_speaking_place == "Elsewhere? if so please specify:"~"other",
+                                                 french_speaking_place %in% c('Quebec and France', 'Quebec, France') ~ 'both', 
+                                                 is.na(french_speaking_place) ~ NA)
+
+
+
+
+live_in_french_env_df <- tibble::rownames_to_column(live_in_french_env_df, "Area")
+live_in_french_env_df %>% 
+  mutate(prop = scales::percent(V1/sum(V1),1))
 ```
 
 
