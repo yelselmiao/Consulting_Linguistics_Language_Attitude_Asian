@@ -145,6 +145,28 @@ data <- data %>%
   )
 
 
+# Live in French-speaking place 
+
+data <- data %>%
+  mutate(
+    french_speaking_place_cate =  case_when((
+      french_speaking_place == 'France' |
+        french_speaking_place == 'France, Elsewhere? if so please specify:'
+    ) ~ 'France',
+    (
+      french_speaking_place == 'Quebec' |
+        french_speaking_place == 'Quebec, Elsewhere? if so please specify:'
+    ) ~ 'Quebec',
+    str_detect(
+      french_speaking_place,
+      'I have never stayed in a French-speaking context.'
+    ) ~ 'never',
+    french_speaking_place == "Elsewhere? if so please specify:" ~
+      "other",
+    french_speaking_place %in% c('Quebec and France', 'Quebec, France') ~ 'both'
+    )
+  ) 
+
 
 # Sum up the score 
 data <- data %>%  
@@ -167,9 +189,9 @@ data <- data %>%
 
 # convert to long format
 data_agg_long <- data %>%  
-  select(c(119:129)) %>%  
+  select(c(120:130)) %>%  
   pivot_longer(-c(id), values_to = "score", names_to = "rec_index") %>% 
-  left_join(data %>% select(- c(1:90, 120:129)), by = 'id') %>% 
+  left_join(data %>% select(- c(1:90, 121:130)), by = 'id') %>% 
   mutate(speaker_race = ifelse(rec_index %in% c('rec_1', 'rec_4', 'rec_7', 'rec_8', 'rec_9'), 'white', 'asian'), 
          speaker_accent = case_when(rec_index %in% c('rec_1', 'rec_6') ~ 'Quebec', 
                                     rec_index %in% c('rec_2', 'rec_9') ~ 'European',
@@ -178,28 +200,7 @@ data_agg_long <- data %>%
                                     rec_index %in% c('rec_5', 'rec_7') ~ 'African'))
 
 
-# Live in French-speaking place 
 
-data <- data %>%
-  mutate(
-    french_speaking_place_cate =  case_when((
-      french_speaking_place == 'France' |
-        french_speaking_place == 'France, Elsewhere? if so please specify:'
-    ) ~ 'France',
-    (
-      french_speaking_place == 'Quebec' |
-        french_speaking_place == 'Quebec, Elsewhere? if so please specify:'
-    ) ~ 'Quebec',
-    str_detect(
-      french_speaking_place,
-      'I have never stayed in a French-speaking context.'
-    ) ~ ' never',
-    french_speaking_place == "Elsewhere? if so please specify:" ~
-      "other",
-    french_speaking_place %in% c('Quebec and France', 'Quebec, France') ~ 'both'
-    )
-  ) %>%
-  select(french_speaking_place, french_speaking_place_cate)
 
 
 
