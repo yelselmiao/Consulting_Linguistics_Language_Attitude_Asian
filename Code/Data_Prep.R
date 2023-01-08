@@ -178,6 +178,29 @@ data_agg_long <- data %>%
                                     rec_index %in% c('rec_5', 'rec_7') ~ 'African'))
 
 
+# Live in French-speaking place 
+
+data <- data %>%
+  mutate(
+    french_speaking_place_cate =  case_when((
+      french_speaking_place == 'France' |
+        french_speaking_place == 'France, Elsewhere? if so please specify:'
+    ) ~ 'France',
+    (
+      french_speaking_place == 'Quebec' |
+        french_speaking_place == 'Quebec, Elsewhere? if so please specify:'
+    ) ~ 'Quebec',
+    str_detect(
+      french_speaking_place,
+      'I have never stayed in a French-speaking context.'
+    ) ~ ' never',
+    french_speaking_place == "Elsewhere? if so please specify:" ~
+      "other",
+    french_speaking_place %in% c('Quebec and France', 'Quebec, France') ~ 'both'
+    )
+  ) %>%
+  select(french_speaking_place, french_speaking_place_cate)
+
 
 
 
