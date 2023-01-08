@@ -419,36 +419,47 @@ data_agg_long %>%
     )
   ) %>%  
   group_by(speaker_accent) %>% 
-  summarise(spearman_cor = round(cor.test(study_year_group_encoded, score, method = 'spearman', exact = FALSE)$estimate,3),
-            spearman_p = round(cor.test(study_year_group_encoded, score, method = 'spearman', exact = FALSE)$p.value,3),
-            kendall_cor = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$estimate,3),
-            kendall_p = round(cor.test(study_year_group_encoded, score, method = 'kendall', exact = FALSE)$p.value,3))
-
+  summarise(spear_cor = round(cor(score, num_of_language, method = 'spearman',use="pairwise.complete.obs"),3),
+             spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
 ```
 
 
 ```{r French-spkeaing Place}
 data %>% 
-  group_by(french_speaking_place) %>% 
+  group_by(french_speaking_place_cate) %>% 
   tally()
 
+data_agg_long %>%
+  group_by(french_speaking_place_cate, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=french_speaking_place_cate))+
+  geom_point() + 
+  geom_line(aes(group = french_speaking_place_cate)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('French-speaking Place') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+data_agg_long %>%
+  ggplot(aes(y = score, x = speaker_accent, fill=french_speaking_place_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='French-speaking Place') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
 
 
-
-data %>%  
-  mutate(french_speaking_place_cate =  case_when(french_speaking_place == 'France' | french_speaking_place == 'France, Elsewhere? if so please specify:'~'France', 
-                                                 french_speaking_place == 'Quebec' | french_speaking_place == 'Quebec, Elsewhere? if so please specify:'~'Quebec', 
-                                                 str_detect(french_speaking_place, 'I have never stayed in a French-speaking context.'~'never') ~' never', 
-                                                 french_speaking_place == "Elsewhere? if so please specify:"~"other",
-                                                 french_speaking_place %in% c('Quebec and France', 'Quebec, France') ~ 'both', 
-                                                 is.na(french_speaking_place) ~ NA)
-
-
-
-
-live_in_french_env_df <- tibble::rownames_to_column(live_in_french_env_df, "Area")
-live_in_french_env_df %>% 
-  mutate(prop = scales::percent(V1/sum(V1),1))
+# KW 
+data_agg_long %>%  
+  group_by(speaker_accent) %>%
+  kruskal_test(score ~ french_speaking_place_cate) 
 ```
 
 
@@ -458,7 +469,29 @@ data %>%
   tally()
 
 
-# due to the sample size, we will combine the group of 4-6 years and 
+# due to the sample size, we will combine the group of 1-3 years, 4-6 years, and 7 - 12
+data_agg_long %>%  
+  mutate(month_live_in_fr_cate = case_when(month_live_in_fr_env %in% c('1 - 3', '4 - 6', '7 - 12')~'1 - 12',
+                                           month_live_in_fr_env == '> 12' ~ '> 12', 
+                                           month_live_in_fr_env == '< 1' ~ '< 1')) %>% 
+  mutate(month_live_in_fr_encode = case_when(month_live_in_fr_cate == '< 1' ~ 1, 
+                                             month_live_in_fr_cate == '1 - 12' ~ 2, 
+                                             month_live_in_fr_cate == '> 12' ~ 3)) %>%  
+  drop_na(month_live_in_fr_encode) %>%  
+  group_by(speaker_accent) %>%
+  summarise(spear_cor = round(cor(score, month_live_in_fr_encode, method = 'spearman',use="pairwise.complete.obs"),3),
+             spear_p_value = round(cor.test(score, month_live_in_fr_encode, method = 'spearman', exact = FALSE)$p.value,3))
+
+
+# no correlation 
+
+
+data_agg_long %>%  
+  mutate(month_live_in_fr_cate = case_when(month_live_in_fr_env %in% c('1 - 3', '4 - 6', '7 - 12')~'1 - 12',
+                                           month_live_in_fr_env == '> 12' ~ '> 12', 
+                                           month_live_in_fr_env == '< 1' ~ '< 1')) %>% 
+  group_by(speaker_accent) %>%
+  kruskal_test(score ~ month_live_in_fr_env) 
 ```
 
 
@@ -507,15 +540,27 @@ data_agg_long %>%
         axis.text.x= element_text(size = 10, hjust = 0.5)) 
 
 
-
-
-
 # KW test         
 data_agg_long %>%  
   filter(!pref_french == 'Other variety of French, please specify:' & !is.na(pref_french) == TRUE) %>% 
   group_by(speaker_accent) %>%
   kruskal_test(score ~ pref_french)  
+
+
+# try ANOVA
 ```
+
+
+
+# Effect of Speaker Race
+
+
+```{r}
+
+```
+
+
+
 
 
 gender
