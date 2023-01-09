@@ -10,6 +10,7 @@ editor_options:
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(rstatix))
 suppressPackageStartupMessages(library(ggpubr))
+suppressPackageStartupMessages(library(rlang))
 `%notin%` <- Negate(`%in%`)
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
@@ -88,6 +89,13 @@ data_agg_long %>%
   group_by(speaker_accent) %>% 
   wilcox_test(score ~ gender, alternative = 'less', paired = FALSE)  
 ```
+
+```{r age - TBD}
+
+```
+
+
+
 
 ```{r Country of Birth - Canada or not}
 data_agg_long %>%
@@ -376,6 +384,11 @@ data_agg_long %>%
              spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
 ```
 
+```{r Monther Tongue - TBD}
+data %>% 
+  group_by(mother_tongue) %>% 
+  tally()
+```
 
 
 ```{r Year of Studying French, fig.height = 3, fig.width = 6}
@@ -553,14 +566,22 @@ data_agg_long %>%
 
 
 # Effect of Speaker Race
+```{r Mean by Factor}
+(col_of_interest <- names(data_agg_long)[c(4,8, 22, 24, 26:32)])
 
-
-```{r}
-
+for (col in col_of_interest){
+  mean_by_factor <- factor_mean(data_agg_long, col)
+  print(mean_by_factor)
+}
 ```
 
 
-
+```{r Two-sample Test by Factor}
+for (col in col_of_interest){
+  wilcox_res <- factor_ts_test(data_agg_long, col)
+  print(wilcox_res)
+}
+```
 
 
 gender
