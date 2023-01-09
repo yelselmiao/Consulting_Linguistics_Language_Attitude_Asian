@@ -202,6 +202,33 @@ data_agg_long <- data %>%
 
 
 
+# helper function: calculate mean by factor
+# factor_mean <- function(df, col_name){
+#   group_var <- enquo(col_name)
+#   res <- df %>% 
+#     group_by(speaker_race, !!group_var) %>% 
+#     summarise(mean_val = round(mean(score, na.rm = TRUE), 2))
+#   return(res)
+# }
+
+factor_mean <- function(df, col_name){
+  group_var <- col_name
+  res <- df %>% 
+    drop_na(!!sym(group_var)) %>%  
+    group_by(speaker_race, !!sym(group_var)) %>%  
+    summarise(mean_val = round(mean(score, na.rm = TRUE), 2))
+  return(res)
+}
+
+
+factor_ts_test <- function(df, col_name) {
+  group_var <- col_name
+  res <- df %>%
+    drop_na(!!sym(group_var)) %>%
+    group_by(!!sym(group_var)) %>%
+    wilcox_test(score ~ speaker_race)
+  return(res)
+}
 
 
 
