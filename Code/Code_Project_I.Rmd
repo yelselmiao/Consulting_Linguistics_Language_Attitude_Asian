@@ -167,7 +167,7 @@ data %>%
 # 2 people don't speak English 
 ```
 
-```{r Month Tongue}
+```{r Mother Tongue}
 month_tongue_df <- data %>% 
   select(mother_tongue) %>%
   mutate(English = ifelse(str_detect(mother_tongue, "English") | str_detect(mother_tongue, "Anglais"), TRUE, FALSE),
