@@ -582,6 +582,11 @@ for (col in col_of_interest){
   print(wilcox_res)
 }
 ```
+# 
+
+```{r}
+
+```
 
 
 gender
