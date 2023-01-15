@@ -262,7 +262,7 @@ data_agg_long %>%
   geom_line(aes(group = ethnic_group_cate)) + 
   theme_bw() + 
   labs(x = 'Accent', y = 'Mean Score') + 
-  scale_colour_discrete('Ethnic Group of Participants') + 
+  scale_colour_discrete('Racial Group of Participants') + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -277,7 +277,7 @@ data_agg_long %>%
   ggplot(aes(y = score, x = speaker_accent, fill=ethnic_group_cate)) +
   geom_boxplot() + 
   theme_bw() + 
-  labs(x = 'Speaker Accent', y = 'Score',fill='Ethnic Group of Participants') + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Racial Group of Participants') + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -295,7 +295,7 @@ data_agg_long %>%
   geom_line(aes(group = ethnic_group_Asian_or_not)) + 
   theme_bw() + 
   labs(x = 'Accent', y = 'Mean Score') + 
-  scale_colour_discrete('Ethnic Group of Participants') + 
+  scale_colour_discrete('Racial Group of Participants') + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
