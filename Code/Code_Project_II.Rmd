@@ -42,10 +42,10 @@ source(paste0(here::here(),
 
 ```{r Gender}
 # due to statistical power, only female and male are included in the test 
- # data %>% 
- #  group_by(gender) %>% 
- #  tally() %>%  
- #  mutate(prop = scales::percent(n/nrow(data)))
+ data %>%
+  group_by(gender) %>%
+  tally() %>%
+  mutate(prop = scales::percent(n/nrow(data)))
 
 
 data_agg_long  %>%
@@ -134,13 +134,13 @@ data_agg_long %>%
 
 ```{r Country of Brith - Continent}
 
-# data %>% 
-#   group_by(continent) %>% 
-#   tally()
+data %>%
+  group_by(continent) %>%
+  tally()
 
 
 data_agg_long %>%  
-  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>% 
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>% 
   group_by(continent_cate, speaker_accent) %>%
   summarise(mu = mean(score, na.rm = TRUE)) %>% 
   ggplot(aes(x=speaker_accent, y=mu,col=continent_cate))+
@@ -148,7 +148,7 @@ data_agg_long %>%
   geom_line(aes(group = continent_cate)) + 
   theme_bw() + 
   labs(x = 'Accent', y = 'Mean Score') + 
-  scale_colour_discrete('Country/Continent of Birth') + 
+  scale_colour_discrete('Birthplace') + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -157,12 +157,12 @@ data_agg_long %>%
 
   
 data_agg_long %>%  
-  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>% 
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>% 
   group_by(continent_cate, speaker_accent) %>%
   ggplot(aes(y = score, x = speaker_accent, fill=continent_cate)) +
   geom_boxplot() + 
   theme_bw() + 
-  labs(x = 'Speaker Accent', y = 'Score',fill='Born in Canada') + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Birthplace') + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -171,7 +171,7 @@ data_agg_long %>%
 
 # KW test         
 data_agg_long %>%  
-  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Other', continent))  %>%
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>%
   group_by(speaker_accent) %>%
   kruskal_test(score ~ continent_cate)  
 
@@ -181,7 +181,7 @@ data_agg_long %>%
 L2 <- data_agg_long %>%
   mutate(continent_cate = ifelse(
     continent %in% c('Africa', 'Europe', 'America'),
-    'Other',
+    'Africa, Europe, America',
     continent
   ))  %>%
   filter(speaker_accent == 'L2')
