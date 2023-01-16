@@ -324,14 +324,15 @@ data_agg_long %>%
 # 1. pure Asian + mixed Asian vs. Non-Asian
 # 2. Pure Asian vs. Non-Asian
 # 3. Pure Asian vs.mixed Asian 
+# 4. non-asian vs. non-asian
 
 
 # 1. pure Asian + mixed Asian vs. Non-Asian
 data_agg_long %>%  
   mutate(ethic_group_reorder = ifelse(ethnic_group_Asian_or_not == 'Non-Asian', 'Non-Asian', 'Asian')) %>%  
   group_by(speaker_accent) %>% 
-  wilcox_test(score ~ ethic_group_reorder, alternative = 'two.sided', paired = FALSE)  
-
+  wilcox_test(score ~ ethic_group_reorder, alternative = 'two.sided', paired = FALSE)  %>% 
+  select(speaker_accent, statistic, p)
 
 
 # 2. Pure Asian vs. Non-Asian
@@ -339,8 +340,15 @@ data_agg_long %>%
   drop_na(ethnic_group_Asian_or_not) %>%
   filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>% 
   group_by(speaker_accent) %>%  
-  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'less', paired = FALSE)
 
+
+data_agg_long %>%  
+  drop_na(ethnic_group_Asian_or_not) %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'less', paired = FALSE) # %>% 
+  #select(statistic, p)
 
 
 
@@ -349,11 +357,33 @@ data_agg_long %>%
 data_agg_long %>%  
   filter(ethnic_group_Asian_or_not != 'Non-Asian') %>% 
   group_by(speaker_accent) %>%  
-  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE)  %>% 
+  select(statistic, p)
+
+data_agg_long %>%  
+  filter(ethnic_group_Asian_or_not != 'Non-Asian') %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'less', paired = FALSE)  
+
+   
+
+# 4. Mixed asian vs. non-asian 
+
+data_agg_long %>%  
+  filter(ethnic_group_Asian_or_not != "Pure Asian") %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'two.sided', paired = FALSE) %>% 
+  select(statistic, p)
+
+
+data_agg_long %>%  
+  filter(ethnic_group_Asian_or_not != "Pure Asian") %>% 
+  group_by(speaker_accent) %>%  
+  wilcox_test(score ~ ethnic_group_Asian_or_not, alternative = 'less', paired = FALSE) 
 ```
 
 
-```{r Languages spoken, fig.height = 3, fig.width = 6}
+```{r Languages spoken, fig.height = 3.5, fig.width = 6}
 data %>% 
   group_by(num_of_language) %>% 
   tally()
@@ -391,7 +421,7 @@ data %>%
 ```
 
 
-```{r Year of Studying French, fig.height = 3, fig.width = 6}
+```{r Year of Studying French, fig.height = 3.5, fig.width = 6}
 data %>% 
   group_by(year_interval) %>% 
   tally()
@@ -413,6 +443,9 @@ data_agg_long %>%
 
 
 # corr
+shapiro.test(data$score)
+
+
 data_agg_long %>%
   mutate(year_of_french = as.numeric(year_of_french)) %>% 
   group_by(speaker_accent) %>% 
@@ -472,7 +505,8 @@ data_agg_long %>%
 # KW 
 data_agg_long %>%  
   group_by(speaker_accent) %>%
-  kruskal_test(score ~ french_speaking_place_cate) 
+  kruskal_test(score ~ french_speaking_place_cate) %>% 
+  select(speaker_accent, statistic, p)
 ```
 
 
