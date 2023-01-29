@@ -689,7 +689,82 @@ FSA::dunnTest(score ~ teacher_origin, data = African, method = 'holm')
 
 ## Comparison of Language Attitudes across each factor level within one speaker race group
 
-```{r Gender/contient of birth/grow up province}
+
+
+### Asian
+
+
+```{r Gender/contient of birth/grow up province - Viz}
+(speaker_race_gender <- data_agg_long %>%
+    filter(speaker_race == 'asian') %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  ggplot(aes(y = score, x = speaker_race, fill=gender)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Gender') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)))  
+
+
+(speaker_race_continent <- data_agg_long %>%
+     filter(speaker_race == 'asian') %>%
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>%
+  ggplot(aes(y = score, x = speaker_race, fill=continent_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Continent/Country of Birth') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)))  
+
+
+(speaker_race_born_in_canada <- data_agg_long %>%
+   filter(speaker_race == 'asian') %>%
+  filter(is.na(born_in_canada) == FALSE) %>%
+  ggplot(aes(y = score, x = speaker_race, fill=born_in_canada)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Born in Canada') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)))  
+
+
+(speaker_race_grow_up_province <- data_agg_long %>%
+     filter(speaker_race == 'asian') %>%
+   drop_na(grow_up_province) %>%
+  mutate(
+    grow_up_province_cate  = ifelse(
+      grow_up_province %in% c('Ontario', 'Quebec', 'Saskatchewan'),
+      'Ontario, Quebec, or Saskatchewan',
+      ifelse(grow_up_province == 'BC', 'BC', 'Alberta')
+    )) %>% 
+  ggplot(aes(y = score, x = speaker_race, fill=grow_up_province_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Grow up Province') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5))) 
+
+
+speaker_race_gender
+speaker_race_continent
+speaker_race_born_in_canada
+speaker_race_grow_up_province
+```
+
+
+```{r Gender/contient of birth/grow up province - Test}
 # Gender
 data_agg_long %>%
   filter(speaker_race == 'asian') %>%
@@ -729,7 +804,81 @@ data_agg_long %>%
 
 # 
 ```
+
+
+```{r}
+
+
+
+race_viz_1 <- data_agg_long %>%
+  filter(speaker_race == 'asian') %>%
+  mutate(
+    ethic_group_reorder = ifelse(ethnic_group_Asian_or_not == 'Non-Asian', 'Non-Asian', 'Asian')
+  ) %>% 
+  ggplot(aes(y = score, x = speaker_race, fill=ethic_group_reorder)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+race_viz_2 <- data_agg_long %>%
+  filter(speaker_race == 'asian') %>%
+  drop_na(ethnic_group_Asian_or_not) %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
+  ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+race_viz_3 <-  data_agg_long %>%
+  filter(speaker_race == 'asian') %>%
+  filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
+  ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+race_viz_4 <-data_agg_long %>%
+   filter(speaker_race == 'asian') %>%
+  filter(ethnic_group_Asian_or_not != "Pure Asian") %>% 
+  ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+
+
+ggarrange(race_viz_1, race_viz_2, race_viz_3, race_viz_4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2)
+```
+
+
+
 ```{r Racial Group}
+
+  
 # 1. pure Asian + mixed Asian vs. Non-Asian
 data_agg_long %>%
   filter(speaker_race == 'asian') %>%
@@ -747,7 +896,7 @@ data_agg_long %>%
   drop_na(ethnic_group_Asian_or_not) %>%
   filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
-              alternative = 'less',
+              alternative = 'two.sided',
               paired = FALSE)
 
 
@@ -769,10 +918,10 @@ data_agg_long %>%
   filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'two.sided',
-              paired = FALSE)  %>%
-  select(statistic, p)
+              paired = FALSE)  
 
 data_agg_long %>%
+  filter(speaker_race == 'asian') %>%
   filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'less',
@@ -818,9 +967,139 @@ data_agg_long %>%
   kruskal_test(score ~ teacher_origin)  
 ```
 
+### White 
+
+```{r Gender/contient of birth/grow up province}
+# Gender
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(gender %in% c('Female', 'Male')) %>%
+  wilcox_test(score ~ gender, alternative = 'two.sided', paired = FALSE)
 
 
-## Comparision of Language Attiatudes between two speaker race group within one factor level
+# continent of birth 
+data_agg_long %>%  
+  filter(speaker_race == 'white') %>%
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>%
+  kruskal_test(score ~ continent_cate)  
+
+
+# born in Canada
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(is.na(born_in_canada) == FALSE) %>%
+  wilcox_test(score ~ born_in_canada,
+              alternative = 'two.sided',
+              paired = FALSE)  
+
+
+# Grow up Province
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  drop_na(grow_up_province) %>%
+  mutate(
+    grow_up_province_cate  = ifelse(
+      grow_up_province %in% c('Ontario', 'Quebec', 'Saskatchewan'),
+      'Ontario, Quebec, or Saskatchewan',
+      ifelse(grow_up_province == 'BC', 'BC', 'Alberta')
+    )
+  ) %>%
+  kruskal_test(score ~ grow_up_province_cate)  
+
+
+# 
+```
+
+```{r Racial Group}
+# 1. pure Asian + mixed Asian vs. Non-Asian
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  mutate(
+    ethic_group_reorder = ifelse(ethnic_group_Asian_or_not == 'Non-Asian', 'Non-Asian', 'Asian')
+  ) %>%
+  wilcox_test(score ~ ethic_group_reorder,
+              alternative = 'two.sided',
+              paired = FALSE)  
+
+
+# 2. Pure Asian vs. Non-Asian
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  drop_na(ethnic_group_Asian_or_not) %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'two.sided',
+              paired = FALSE)
+
+
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  drop_na(ethnic_group_Asian_or_not) %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'less',
+              paired = FALSE) # %>%
+#select(statistic, p)
+
+
+
+# since the sample size should be at least 6 for Wilcox
+# 3. Pure Asian vs.mixed Asian
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'two.sided',
+              paired = FALSE)  %>%
+  select(statistic, p)
+
+data_agg_long %>%
+  filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'less',
+              paired = FALSE)
+
+
+
+# 4. Mixed asian vs. non-asian
+
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(ethnic_group_Asian_or_not != "Pure Asian") %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'two.sided',
+              paired = FALSE) %>%
+  select(statistic, p)
+
+
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(ethnic_group_Asian_or_not != "Pure Asian") %>%
+  wilcox_test(score ~ ethnic_group_Asian_or_not,
+              alternative = 'less',
+              paired = FALSE) 
+```
+
+```{r French Speaking Place/Preference/Teacher Origin}
+# KW 
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  kruskal_test(score ~ french_speaking_place_cate)
+
+
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  filter(!pref_french == 'Other variety of French, please specify:' &
+           !is.na(pref_french) == TRUE) %>%
+  kruskal_test(score ~ pref_french)
+
+data_agg_long %>%
+  filter(speaker_race == 'white') %>%
+  drop_na(teacher_origin) %>%
+  kruskal_test(score ~ teacher_origin)  
+```
+
+## Comparision of Language Attitudes between two speaker race group within one factor level
 ```{r Mean by Factor}
 (col_of_interest <- names(data_agg_long)[c(4,8, 22, 24, 26:32)])
 
