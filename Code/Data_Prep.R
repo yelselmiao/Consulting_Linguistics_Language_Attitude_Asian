@@ -114,14 +114,14 @@ data <- data %>%
       TRUE ~ 'Asian',
     )
   ) %>%  
-  mutate(ethnic_group_Asian_or_not = case_when(ethnic_group_cate == 'Asian' ~ 'Pure Asian', 
+  mutate(ethnic_group_Asian_or_not = case_when(ethnic_group_cate == 'Asian' ~ 'Single-race Asian', 
                                                ethnic_group_other %in% c('Mix between Korean and Canadian.', 
                                                                          'Metis: White and Chinese.', 
                                                                          'White and Chinese', 
                                                                          'White, Korean and Caribbean', 
                                                                          'Black and Southeast Asian', 
                                                                          'White/Chinese', 
-                                                                         'Blanc, Japonais') ~ 'Mixed Asian', 
+                                                                         'Blanc, Japonais') ~ 'Mixed-race Asian', 
                                                TRUE ~ 'Non-Asian')) 
 
 
