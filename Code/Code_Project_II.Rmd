@@ -824,10 +824,9 @@ data_agg_long %>%
 ```
 
 
-```{r fig.height=4, fig.width=6}
+```{r racial group - viz, fig.height=4, fig.width=6}
 
 race_viz_1 <- data_agg_long %>%
-  filter(speaker_race == 'asian') %>%
   mutate(
     ethic_group_reorder = ifelse(ethnic_group_Asian_or_not == 'Non-Asian', 'Non-Asian', 'Asian')
   ) %>% 
@@ -835,7 +834,7 @@ race_viz_1 <- data_agg_long %>%
   geom_boxplot() + 
   theme_bw() + 
   labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
-  ggtitle("Asian vs. Non-Asian") + 
+  ggtitle("(A) Asian vs. Non-Asian") + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -843,14 +842,13 @@ race_viz_1 <- data_agg_long %>%
         axis.text.x= element_text(size = 10, hjust = 0.5)) 
 
 race_viz_2 <- data_agg_long %>%
-  filter(speaker_race == 'asian') %>%
   drop_na(ethnic_group_Asian_or_not) %>%
   filter(ethnic_group_Asian_or_not != 'Mixed-race Asian') %>%
   ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
   geom_boxplot() + 
   theme_bw() + 
   labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
-  ggtitle("Non-Asian vs. Single-race Asian") + 
+  ggtitle("(B) Non-Asian vs. Single-race Asian") + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -859,13 +857,12 @@ race_viz_2 <- data_agg_long %>%
 
 
 race_viz_3 <-  data_agg_long %>%
-  filter(speaker_race == 'asian') %>%
   filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
   ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
   geom_boxplot() + 
   theme_bw() + 
   labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
-  ggtitle("Mixed-race Asian vs. Single-race Asian") + 
+  ggtitle("(D) Mixed-race Asian vs. Single-race Asian") + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -874,13 +871,12 @@ race_viz_3 <-  data_agg_long %>%
 
 
 race_viz_4 <-data_agg_long %>%
-   filter(speaker_race == 'asian') %>%
   filter(ethnic_group_Asian_or_not != "Single-race Asian") %>% 
   ggplot(aes(y = score, x = speaker_race, fill=ethnic_group_Asian_or_not)) +
   geom_boxplot() + 
   theme_bw() + 
   labs(x = 'Speaker Race', y = 'Score',fill='Racial Group') + 
-  ggtitle("Mixed-race Asian vs. Non-Asian") + 
+  ggtitle("(C) Mixed-race Asian vs. Non-Asian") + 
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
@@ -889,7 +885,7 @@ race_viz_4 <-data_agg_long %>%
 
 
 
-ggarrange(race_viz_1, race_viz_2, race_viz_3, race_viz_4 + rremove("x.text"), 
+ggarrange(race_viz_1, race_viz_2, race_viz_4, race_viz_3 , 
           hjust=-0.8,
           ncol = 2, nrow = 2)
 ```
@@ -921,6 +917,11 @@ data %>%
   select(ethnic_group, ethnic_group_Asian_or_not, ethnic_group_cate)
 
 ```
+
+
+
+
+
 
 
 ```{r Racial Group}
@@ -995,7 +996,52 @@ data_agg_long %>%
               paired = FALSE) 
 ```
 
-```{r French Speaking Place/Preference/Teacher Origin}
+```{r Live in French-speaing Place - Viz}
+data_agg_long %>%
+  drop_na(french_speaking_place_cate) %>% 
+  ggplot(aes(y = score, x = speaker_race, fill=french_speaking_place_cate)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Live in French-Speaking Place') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+```
+
+```{r Pref French - Viz}
+data_agg_long %>%
+  filter(!pref_french == 'Other variety of French, please specify:' &
+           !is.na(pref_french) == TRUE) %>%
+  ggplot(aes(y = score, x = speaker_race, fill=pref_french)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Preferred Variety of French') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+```
+
+```{r Teacher Origin - Viz}
+data_agg_long %>%
+  drop_na(teacher_origin) %>%
+  ggplot(aes(y = score, x = speaker_race, fill=teacher_origin)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Origin of French Teacher') + 
+  scale_fill_discrete(name = "Origin of French Teacher", labels = c('French', 'Other', 'Quebec')) + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+```
+
+
+```{r French Speaking Place/Preference/Teacher Origin - test}
 # KW 
 data_agg_long %>%
   filter(speaker_race == 'asian') %>%
@@ -1012,6 +1058,12 @@ data_agg_long %>%
   filter(speaker_race == 'asian') %>%
   drop_na(teacher_origin) %>%
   kruskal_test(score ~ teacher_origin)  
+
+
+data_agg_long %>%
+  filter(speaker_race == 'asian') %>%
+  drop_na(teacher_origin) %>%
+  dunn_test(score ~ teacher_origin)
 ```
 
 ### White 
@@ -1028,7 +1080,13 @@ data_agg_long %>%
 data_agg_long %>%  
   filter(speaker_race == 'white') %>%
   mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>%
-  kruskal_test(score ~ continent_cate)  
+  kruskal_test(score ~ continent_cate)
+
+
+data_agg_long %>%  
+  filter(speaker_race == 'white') %>%
+  mutate(continent_cate = ifelse(continent %in% c('Africa', 'Europe', 'America'), 'Africa, Europe, America', continent))  %>%
+  dunn_test(score ~ continent_cate)  
 
 
 # born in Canada
@@ -1073,7 +1131,7 @@ data_agg_long %>%
 data_agg_long %>%
   filter(speaker_race == 'white') %>%
   drop_na(ethnic_group_Asian_or_not) %>%
-  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed-race Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'two.sided',
               paired = FALSE)
@@ -1082,7 +1140,7 @@ data_agg_long %>%
 data_agg_long %>%
   filter(speaker_race == 'white') %>%
   drop_na(ethnic_group_Asian_or_not) %>%
-  filter(ethnic_group_Asian_or_not != 'Mixed Asian') %>%
+  filter(ethnic_group_Asian_or_not != 'Mixed-race Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'less',
               paired = FALSE) # %>%
@@ -1101,6 +1159,7 @@ data_agg_long %>%
   select(statistic, p)
 
 data_agg_long %>%
+  filter(speaker_race == 'white') %>%
   filter(ethnic_group_Asian_or_not != 'Non-Asian') %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'less',
@@ -1112,16 +1171,15 @@ data_agg_long %>%
 
 data_agg_long %>%
   filter(speaker_race == 'white') %>%
-  filter(ethnic_group_Asian_or_not != "Pure Asian") %>%
+  filter(ethnic_group_Asian_or_not != "Single-race Asian") %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'two.sided',
-              paired = FALSE) %>%
-  select(statistic, p)
+              paired = FALSE) 
 
 
 data_agg_long %>%
   filter(speaker_race == 'white') %>%
-  filter(ethnic_group_Asian_or_not != "Pure Asian") %>%
+  filter(ethnic_group_Asian_or_not != "Single-race Asian") %>%
   wilcox_test(score ~ ethnic_group_Asian_or_not,
               alternative = 'less',
               paired = FALSE) 
