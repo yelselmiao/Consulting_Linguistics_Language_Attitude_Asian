@@ -90,21 +90,35 @@ data_agg_long %>%
   wilcox_test(score ~ gender, alternative = 'less', paired = FALSE)  
 ```
 
-```{r age, fig.height=3, fig.width=6}
+```{r age, fig.height=5, fig.width=4}
+# data_agg_long %>%
+#   ggplot(aes(x = age, y = score)) +
+#   geom_jitter() +
+#   geom_smooth(data=subset(data_agg_long,
+#                           age < 30)) +
+#   #geom_smooth(method = loess, method.args = list(family = "symmetric")) + 
+#   facet_wrap( ~ speaker_accent, nrow = 5) +
+#   theme_bw() + 
+#   labs(x = 'Age', y = 'Score') + 
+#   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+#         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+#         strip.text = element_text(size=12),
+#         axis.text.y = element_text(size = 10),
+#         axis.text.x = element_text(size = 10)) 
+
 data_agg_long %>%
+  filter(age < 30) %>% 
   ggplot(aes(x = age, y = score)) +
   geom_jitter() +
-  geom_smooth(data=subset(data_agg_long,
-                          age < 30)) +
-  #geom_smooth(method = loess, method.args = list(family = "symmetric")) + 
-  facet_grid( ~ speaker_accent) +
-  theme_bw() + 
-  labs(x = 'Age', y = 'Score') + 
+  geom_smooth() +
+  facet_wrap( ~ speaker_accent, nrow = 5) +
+  theme_bw() +
+  labs(x = 'Age', y = 'Score') +
   theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
         axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
         strip.text = element_text(size=12),
         axis.text.y = element_text(size = 10),
-        axis.text.x = element_text(size = 10)) 
+        axis.text.x = element_text(size = 10))
 
 
 # corr
@@ -118,6 +132,8 @@ data_agg_long %>%
   summarise(pearson_cor = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$estimate,3),
             pearson_p = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$p.value,3),
             )
+
+
 ```
 
 
@@ -440,10 +456,54 @@ data_agg_long %>%
              spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
 ```
 
-```{r Monther Tongue - TBD}
+```{r Monther Tongue}
 data %>% 
   group_by(mother_tongue) %>% 
   tally()
+
+data %>% 
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  group_by(multi_first_lang) %>% 
+  tally()
+
+# mean line chart
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  group_by(multi_first_lang, speaker_accent) %>%
+  summarise(mu = mean(score, na.rm = TRUE)) %>% 
+  ggplot(aes(x=speaker_accent, y=mu,col=multi_first_lang))+
+  geom_point() + 
+  geom_line(aes(group = multi_first_lang)) + 
+  theme_bw() + 
+  labs(x = 'Accent', y = 'Mean Score') + 
+  scale_colour_discrete('Speak more than one first language') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10)) 
+
+# boxplot
+data_agg_long %>% 
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  ggplot(aes(y = score, x = speaker_accent, fill=multi_first_lang)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Accent', y = 'Score',fill='Speak More than One First Language') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+
+data_agg_long %>% 
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  group_by(speaker_accent) %>% 
+  wilcox_test(score ~ multi_first_lang)
 ```
 
 
@@ -1066,6 +1126,43 @@ data_agg_long %>%
   dunn_test(score ~ teacher_origin)
 ```
 
+
+```{r Mother tongue - viz}
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  ggplot(aes(y = score, x = speaker_race, fill=multi_first_lang)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = 'Speaker Race', y = 'Score',fill='Speak more than one first language') + 
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x= element_text(size = 10, hjust = 0.5)) 
+```
+
+
+
+```{r Mother tongue -}
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+   filter(speaker_race == 'asian') %>%
+  kruskal_test(score ~ multi_first_lang)
+
+
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+   filter(speaker_race == 'white') %>%
+  kruskal_test(score ~ multi_first_lang)
+```
+
+
+
+
+
 ### White 
 
 ```{r Gender/contient of birth/grow up province}
@@ -1204,6 +1301,87 @@ data_agg_long %>%
   kruskal_test(score ~ teacher_origin)  
 ```
 
+## Correlation analysis for numberic variables 
+
+```{r Year of Speaking French}
+data_agg_long %>%
+  mutate(year_of_french = as.numeric(year_of_french)) %>% 
+  group_by(speaker_race) %>% 
+  summarise(pearson_cor = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$estimate,3),
+            pearson_p = round(cor.test(year_of_french, score, method = 'pearson', exact = FALSE)$p.value,3),
+            )
+
+# encode year interval into rank
+data_agg_long %>% 
+  drop_na(year_interval) %>% 
+  mutate(
+    study_year_group_encoded = case_when(
+      year_interval == "0-5" ~ 1,
+      year_interval == "5-10" ~2,
+      year_interval == "10-15" ~ 3,
+      year_interval == "15+" ~ 4
+    )
+  ) %>%  
+  group_by(speaker_race) %>% 
+  summarise(spear_cor = round(cor(score, num_of_language, method = 'spearman',use="pairwise.complete.obs"),3),
+             spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
+```
+
+```{r # of Spoken Language}
+data_agg_long %>% 
+  drop_na(num_of_language) %>% 
+   mutate(num_of_language = as.numeric(num_of_language)) %>% 
+   group_by(speaker_race) %>% 
+   summarise(spear_cor = round(cor(score, num_of_language, method = 'spearman'),3),
+             spear_p_value = round(cor.test(score, num_of_language, method = 'spearman', exact = FALSE)$p.value,3))
+```
+
+```{r Months of living in French-speaking places}
+data_agg_long %>%  
+  mutate(month_live_in_fr_cate = case_when(month_live_in_fr_env %in% c('1 - 3', '4 - 6', '7 - 12')~'1 - 12',
+                                           month_live_in_fr_env == '> 12' ~ '> 12', 
+                                           month_live_in_fr_env == '< 1' ~ '< 1')) %>% 
+  mutate(month_live_in_fr_encode = case_when(month_live_in_fr_cate == '< 1' ~ 1, 
+                                             month_live_in_fr_cate == '1 - 12' ~ 2, 
+                                             month_live_in_fr_cate == '> 12' ~ 3)) %>%  
+  drop_na(month_live_in_fr_encode) %>%  
+  group_by(speaker_race) %>%
+  summarise(spear_cor = round(cor(score, month_live_in_fr_encode, method = 'spearman',use="pairwise.complete.obs"),3),
+             spear_p_value = round(cor.test(score, month_live_in_fr_encode, method = 'spearman', exact = FALSE)$p.value,3))
+```
+
+```{r age}
+data_agg_long %>%
+  filter(age < 30) %>% 
+  ggplot(aes(x = age, y = score)) +
+  geom_jitter() +
+  geom_smooth() +
+  facet_wrap( ~ speaker_race, nrow = 5) +
+  theme_bw() +
+  labs(x = 'Age', y = 'Score') +
+  theme(axis.title.x = element_text(size = 12,face = 'bold', hjust = 0.5, vjust = -0.6),
+        axis.title.y = element_text(size = 12,face = 'bold', vjust = 3, hjust = 0.5),
+        strip.text = element_text(size=12),
+        axis.text.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+
+# corr
+shapiro.test(data_agg_long$score)
+shapiro.test(data_agg_long$age)
+
+
+data_agg_long %>%
+  drop_na(age) %>% 
+  group_by(speaker_race) %>% 
+  summarise(pearson_cor = round(cor.test(age, score, method = 'pearson', exact = FALSE)$estimate,3),
+            pearson_p = round(cor.test(age, score, method = 'pearson', exact = FALSE)$p.value,3),
+            )
+
+```
+
+
+
 ## Comparision of Language Attitudes between two speaker race group within one factor level
 ```{r Mean by Factor}
 (col_of_interest <- names(data_agg_long)[c(4,8, 22, 24, 26:32)])
@@ -1216,6 +1394,13 @@ for (col in col_of_interest){
 
 
 
+```{r Mother Tongue}
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  group_by(speaker_race, multi_first_lang) %>% 
+  summarise(mu = mean(score, na.rm = TRUE))
+```
 
 
 
@@ -1227,6 +1412,15 @@ for (col in col_of_interest){
 ```
 
 
+```{r Mother tongue}
+data_agg_long %>%
+  drop_na(mother_tongue) %>%  
+  mutate(multi_first_lang = ifelse(str_detect(mother_tongue, ","), TRUE, FALSE)) %>% 
+  group_by(multi_first_lang) %>% 
+  wilcox_test(score ~ speaker_race)
+
+
+```
 
 
 gender
