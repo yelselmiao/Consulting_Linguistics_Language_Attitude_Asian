@@ -554,7 +554,7 @@ data_agg_long %>%
 ```
 
 
-```{r French-spkeaing Place}
+```{r French-spkeaking Place}
 data %>% 
   group_by(french_speaking_place_cate) %>% 
   tally()
