@@ -193,7 +193,7 @@ colnames(language_count) = c('mother_tongue', 'n')
 
 language_count %>% 
   arrange(desc(n)) %>% 
-  mutate(prop = scales::percent(n/sum(n)))
+ #  mutate(prop = scales::percent(n/sum(n)))
 ```
 
 ```{r Year of Studying French}

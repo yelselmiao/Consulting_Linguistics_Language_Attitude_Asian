@@ -1,5 +1,6 @@
 
 # Wrap some of the data cleaning codes for the second project
+`%notin%` <- Negate(`%in%`)
 
 
 # Clean the socio-demographic columns 
